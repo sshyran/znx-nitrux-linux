@@ -1,31 +1,29 @@
-desktop-color: "#303030"
+title-text: "znx"
+title-color: "#2D2C2A"
+desktop-color: "#2D2C2A"
 
 + boot_menu {
-	left = 5%
-	width = 55%
-	top = 20%
-	height = 60%
+	left = 8%
+	width = 64%
+	top = 16%
+	height = 64%
 
-	item_color   = "#FFFFFF"
-	item_height  = 20
-	item_padding = 5
+	item_color   = "#ffffff"
+	item_height  = 16
+	item_padding = 4
 	item_spacing = 4
 
 	item_icon_space = 8
 	icon_width = 32
 	icon_height = 32
 
-	selected_item_color = "#FFFFFF"
+	selected_item_color = "#ffffff"
 	selected_item_pixmap_style = "select_*.png"
-
-	scrollbar = true
-	scrollbar_width = 20
-	scrollbar_thumb = "slider_*.png"
 }
 
 + image {
-	top = 100%-90
-	left = 5%
+	top = 100%-96
+	left = 8%
 	width = 640
 	height = 42
 	file = "info.png"
@@ -33,14 +31,14 @@ desktop-color: "#303030"
 
 + progress_bar {
 	id = "__timeout__"
-	left = 5%
+	left = 8%
 	width = 640
-	top = 84%
+	top = 64%
 	height = 42
-	
-	fg_color = "#4a4a4a"
-	bg_color = "#303030"
-	border_color = #303030"
+
+	fg_color = "#ffffff"
+	bg_color = "#2D2C2A"
+	border_color = #2D2C2A"
 	show_text = false
 	text = "@TIMEOUT_NOTIFICATION_SHORT@"
 }
