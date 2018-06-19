@@ -4,4 +4,4 @@
 - Upgrade the systems in an safe (atomic) way.
 - Update the images based on differential content.
 
-![](preview.png)
+![](img/preview.png)
