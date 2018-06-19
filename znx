@@ -229,4 +229,5 @@ case $COMMAND in
 	;;
 
 	*) error "No such command '$COMMAND'.";;
+
 esac
