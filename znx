@@ -1,13 +1,13 @@
 #! /bin/sh
 
+set -e
+
 COMMAND=$1
 DEVICE=$2
 IMAGE=$3
 URL=$4
 ZNX_DIR=/tmp/znx
 
-
-set -e
 
 # A bunch of handy functions.
 
@@ -24,7 +24,7 @@ _clean () {
 	rm -rf $ZNX_DIR
 }
 
-# Always clean $ZNX_DIR
+# Always clean $ZNX_DIR on exit.
 
 trap _clean EXIT HUP INT TERM
 
@@ -67,7 +67,7 @@ echo $DEVICE | grep -q '[0-9]' && \
 mkdir -p $ZNX_DIR
 
 
-# Perform the right action.
+# Run the specified command.
 
 case $COMMAND in
 
@@ -91,7 +91,7 @@ case $COMMAND in
 			blkid $dev | grep -q ZNX_BOOT && {
 				mkfs.vfat $dev
 				mount $dev $ZNX_DIR || \
-					error "Unable to mount $dev! Can't continue."
+					error "Unable to mount $dev! Device initialization failed."
 
 				mkdir -p $ZNX_DIR/efi/boot
 				mkdir -p $ZNX_DIR/boot
@@ -111,7 +111,7 @@ case $COMMAND in
 			blkid $dev | grep -q ZNX_DATA && {
 				mkfs.btrfs -qf $dev
 				mount $dev $ZNX_DIR || \
-					error "Unable to mount $DATA! Exiting now."
+					error "Unable to mount $DATA! Device initialization failed."
 
 				mkdir -p $ZNX_DIR/boot_images
 				mkdir -p $ZNX_DIR/apps
@@ -143,7 +143,7 @@ case $COMMAND in
 		cp -u $URL $ZNX_DIR/boot_images/$IMAGE || {
 			cd $ZNX_DIR/boot_images/$IMAGE && \
 				zsync -q $URL
-			echo "Successfully deployed \e[32m$IMAGE\e[0m." 
+			echo "Successfully deployed \e[32m$IMAGE\e[0m."
 		} || {
 			rm -rf $ZNX_DIR/boot_images/$IMAGE && \
 				error "Failed to access $URL."
@@ -206,7 +206,7 @@ case $COMMAND in
 	remove)
 
 		[ $# -ne 3 ] && \
-			error "Wrong number of parameters passed."
+			error "Bad command: wrong number of arguments."
 
 		_mount
 		cd $ZNX_DIR/boot_images/$IMAGE || \
@@ -215,16 +215,16 @@ case $COMMAND in
 		rm -rf $ZNX_DIR/boot_images/$IMAGE && \
 			echo "Successfully removed \e[32m$IMAGE\e[0m."
 
+		[ -d $ZNX_DIR/boot_images/$IMAGE/* ] ||
+			rm -rf $ZNX_DIR/boot_images/${IMAGE%%/*}
+
 	;;
 
 	list)
 
 		_mount
 		cd $ZNX_DIR/boot_images
-
-		for d in ${IMAGE:-*/*}; do
-			echo "\e[36m$d\e[0m"
-		done
+		find $IMAGE* -mindepth 1 -maxdepth 2 -type d -exec echo -e '\e[36m' {} '\e[0m' \;
 
 	;;
 
