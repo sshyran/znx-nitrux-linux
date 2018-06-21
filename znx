@@ -222,9 +222,15 @@ case $COMMAND in
 
 	list)
 
+		[ $# -ne 2 ] && \
+			error "Bad command: wrong number of arguments."
+
 		_mount
 		cd $ZNX_DIR/boot_images
-		find $IMAGE* -mindepth 1 -maxdepth 2 -type d -exec echo -e '\e[36m' {} '\e[0m' \;
+
+		for x in */*; do
+			echo -e "\e[36m${x}\e[0m"
+		done
 
 	;;
 
