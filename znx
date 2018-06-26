@@ -12,7 +12,7 @@ ZNX_DIR=/tmp/znx
 # A bunch of handy functions.
 
 error () {
-	echo "znx: \e[31mError:\e[0m $@"
+	echo "znx: \e[31mError:\e[0m $@" >& 2
 	exit 1
 }
 
@@ -164,7 +164,7 @@ case $COMMAND in
 		UPDATE_URL=$(echo $(dd if=*.iso bs=1 seek=33651 count=512 2 > /dev/null))
 
 		cd $ZNX_DIR/boot_images/$IMAGE && {
-			zsync -q ${UPDATE_URL:-$URL} && \
+			zsync ${UPDATE_URL:-$URL} && \
 				echo "Successfully updated $IMAGE."
 		} || {
 			error "Failed to access $URL."
