@@ -1,0 +1,3 @@
+ZNX=$(find ./ -name znx)
+
+PATH=$PATH:$(dirname $ZNX)) $ZNX

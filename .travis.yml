@@ -40,6 +40,9 @@ script:
   - delete_blacklisted
   - rm ./functions.sh
   - ../linuxdeployqt-continuous-x86_64.AppImage znx.desktop -bundle-non-qt-libs || echo 'Error while copying libs'
+  - rm AppRun
+  - mv AppRun.template AppRun
+  - chmod a+x AppRun
   - find ./lib/x86_64-linux-gnu/ -type f -exec patchelf --set-rpath '$ORIGIN/./' {} \;
   - patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu/' usr/bin/grub-mkimage
   - find ./ -type f
