@@ -26,8 +26,8 @@ script:
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
   - ln -s $(realpath appdir/usr/bin/znx) appdir/AppRun
-  - ./copier /usr/bin/grub-mkimage appdir/usr/bin
-  - ./copier /usr/bin/zsync appdir/usr/bin
+  - bash ./copier /usr/bin/grub-mkimage appdir/usr/bin
+  - bash ./copier /usr/bin/zsync appdir/usr/bin
   - cd appdir
   - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
   - chmod a+x functions.sh
