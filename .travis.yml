@@ -1,0 +1,73 @@
+language: cpp
+compiler: gcc
+dist: trusty
+sudo: required
+
+notifications:
+  email: false
+
+addons:
+  apt:
+    packages:
+      - wget
+      - zsync
+
+before_install:
+  - wget https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - chmod a+x upload.sh
+  - wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+  - chmod a+x appimagetool-x86_64.AppImage
+  - wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
+  - chmod a+x copier
+  - wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+  - chmod a+x znx
+  - wget http://ftp.debian.org/debian/pool/main/p/patchelf/patchelf_0.8-2_amd64.deb -O /tmp/patchelf_0.8-2_amd64.deb
+
+install:
+  - sudo dpkg -i /tmp/patchelf_0.8-2_amd64.deb
+  - mkdir -p appdir/usr/bin
+  - cp ./znx appdir/usr/bin
+  - touch appdir/usr/bin/znx-wrapper
+  - echo '#!/bin/sh' | tee appdir/usr/bin/znx-wrapper
+  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a appdir/usr/bin/znx-wrapper
+  - chmod a+x appdir/usr/bin/znx-wrapper
+  - bash ./copier /usr/bin/grub-mkimage appdir
+  - bash ./copier /usr/bin/zsync appdir
+  - cd appdir
+  - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
+  - chmod a+x functions.sh
+  - . ./functions.sh
+  - delete_blacklisted
+  - rm ./functions.sh
+  - ../linuxdeployqt-continuous-x86_64.AppImage znx.desktop -bundle-non-qt-libs || echo 'Error while copying libs'
+  - find ./lib/x86_64-linux-gnu/ -type f -exec patchelf --set-rpath '$ORIGIN/./' {} \;
+  - patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu/' usr/bin/grub-mkimage
+  - find ./ -type f
+  - cd ..
+
+script:
+  - export VERSION=$(git rev-parse --short HEAD)
+  - ARCH=x86_64 ./appimagetool-x86_64.AppImage appdir
+
+after_success:
+  - mkdir out
+  - mv ./ZNX*.AppImage ./out/
+  - md5sum ./out/ZNX*.AppImage > ./out/MD5-$VERSION.txt
+  - curl --upload-file ./out/ZNX*.AppImage https://transfer.sh/
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)$/
+
+before_deploy:
+  - if [ -z "$TRAVIS_TAG" ]; then export TRAVIS_TAG="continuous"; git tag -f $TRAVIS_TAG; fi
+
+deploy:
+  provider: script
+  script: bash upload.sh out/*
+  skip_cleanup: true
+  on:
+    repo: anupam-git/znx
+    branch: master
