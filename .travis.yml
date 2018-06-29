@@ -29,10 +29,12 @@ install:
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
   - ln -s usr/bin/znx-wrapper appdir/AppRun
+  - chmod a+x appdir/AppRun
   - bash ./copier /usr/bin/grub-mkimage appdir
   - bash ./copier /usr/bin/zsync appdir
   - cd appdir
   - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a usr/bin/znx-wrapper
+  - chmod a+x usr/bin/znx-wrapper
   - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
   - chmod a+x functions.sh
   - . ./functions.sh
