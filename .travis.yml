@@ -17,6 +17,8 @@ before_install:
   - chmod a+x upload.sh
   - wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
   - chmod a+x appimagetool-x86_64.AppImage
+  - wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
+  - chmod a+x copier
   - wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   - chmod a+x znx
@@ -26,14 +28,13 @@ install:
   - sudo dpkg -i /tmp/patchelf_0.8-2_amd64.deb
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
-  - cp /usr/bin/grub-mkimage appdir/usr/bin/
-  - cp /usr/bin/zsync appdir/usr/bin/
+  - touch appdir/usr/bin/znx-wrapper
+  - echo '#!/bin/sh' | tee appdir/usr/bin/znx-wrapper
+  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a appdir/usr/bin/znx-wrapper
+  # - ln -s usr/bin/znx appdir/AppRun
+  - bash ./copier /usr/bin/grub-mkimage appdir
+  - bash ./copier /usr/bin/zsync appdir
   - cd appdir
-  - echo '#!/bin/sh' | tee usr/bin/znx-wrapper
-  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a usr/bin/znx-wrapper
-  - chmod a+x usr/bin/znx-wrapper
-  - ln -s ./usr/bin/znx-wrapper AppRun
-  - chmod 777 AppRun
   - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
   - chmod a+x functions.sh
   - . ./functions.sh
