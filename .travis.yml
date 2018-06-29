@@ -19,12 +19,14 @@ before_install:
   - chmod a+x appimagetool-x86_64.AppImage
   - wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
   - chmod a+x copier
+  - wget https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
+  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   - chmod a+x znx
 
 script:
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
-  - ln -s usr/bin/znx appdir/AppRun
+  # - ln -s usr/bin/znx appdir/AppRun
   - bash ./copier /usr/bin/grub-mkimage appdir
   - bash ./copier /usr/bin/zsync appdir
   - cd appdir
@@ -33,6 +35,8 @@ script:
   - . ./functions.sh
   - delete_blacklisted
   - rm ./functions.sh
+  - ../linuxdeployqt-continuous-x86_64.AppImage znx.desktop -bundle-non-qt-libs
+  - find ./ -type -f
   - cd ..
   - export VERSION=$(git rev-parse --short HEAD)
   - ARCH=x86_64 ./appimagetool-x86_64.AppImage appdir
