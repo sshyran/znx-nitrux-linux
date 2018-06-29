@@ -1,0 +1,60 @@
+language: cpp
+compiler: gcc
+dist: trusty
+sudo: required
+
+notifications:
+  email: false
+
+addons:
+  apt:
+    packages:
+      - wget
+      - zsync
+
+before_install:
+  - wget https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - chmod a+x upload.sh
+  - wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+  - chmod a+x appimagetool-x86_64.AppImage
+  - wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
+  - chmod a+x copier
+  - chmod a+x znx
+
+script:
+  - mkdir -p appdir/usr/bin
+  - cp ./znx appdir/usr/bin
+  - ln -s $(realpath appdir/usr/bin/znx) appdir/AppRun
+  - ./copier /usr/bin/grub-mkimage appdir/usr/bin
+  - ./copier /usr/bin/zsync appdir/usr/bin
+  - cd appdir
+  - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
+  - chmod a+x functions.sh
+  - . ./functions.sh
+  - delete_blacklisted
+  - rm ./functions.sh
+  - cd ..
+  - export VERSION=$(git rev-parse --short HEAD)
+  - ARCH=x86_64 ./appimagetool-x86_64.AppImage appdir
+
+after_success:
+  - mkdir out
+  - mv ./znx*.AppImage ./out/
+  - md5sum ./out/znx*.AppImage > ./out/MD5-$VERSION.txt
+  - curl --upload-file ./out/znx*.AppImage https://transfer.sh/
+
+branches:
+  except:
+    - # Do not build tags that we create when we upload to GitHub Releases
+    - /^(?i:continuous)$/
+
+before_deploy:
+  - if [ -z "$TRAVIS_TAG" ]; then export TRAVIS_TAG="continuous"; git tag -f $TRAVIS_TAG; fi
+
+deploy:
+  provider: script
+  script: bash upload.sh out/*
+  skip_cleanup: true
+  on:
+    repo: anupam-git/znx
+    branch: master
