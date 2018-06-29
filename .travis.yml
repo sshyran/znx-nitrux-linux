@@ -34,7 +34,7 @@ install:
   - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a usr/bin/znx-wrapper
   - chmod a+x usr/bin/znx-wrapper
   - ln -s ./usr/bin/znx-wrapper AppRun
-  - chmod a+x appdir/AppRun
+  - chmod a+x AppRun
   - wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
   - chmod a+x functions.sh
   - . ./functions.sh
