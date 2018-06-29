@@ -1,5 +1,0 @@
-ZNX=$(find ./ -name znx)
-
-echo ">>>>" $(dirname $ZNX) $ZNX
-
-PATH=$PATH:$(dirname $ZNX) $ZNX "$@"

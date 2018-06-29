@@ -26,8 +26,6 @@ before_install:
 
 install:
   - sudo dpkg -i /tmp/patchelf_0.8-2_amd64.deb
-
-script:
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
   # - ln -s usr/bin/znx appdir/AppRun
@@ -40,13 +38,14 @@ script:
   - delete_blacklisted
   - rm ./functions.sh
   - ../linuxdeployqt-continuous-x86_64.AppImage znx.desktop -bundle-non-qt-libs || echo 'Error while copying libs'
-  - rm AppRun
-  - mv AppRun.template AppRun
-  - chmod a+x AppRun
   - find ./lib/x86_64-linux-gnu/ -type f -exec patchelf --set-rpath '$ORIGIN/./' {} \;
   - patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu/' usr/bin/grub-mkimage
   - find ./ -type f
+  - echo 'ZNX=$(find ./ -name znx)' | tee AppRun
+  - echo 'PATH=$PATH:$(dirname $ZNX) $ZNX "$@"' | tee -a AppRun
   - cd ..
+
+script:
   - export VERSION=$(git rev-parse --short HEAD)
   - ARCH=x86_64 ./appimagetool-x86_64.AppImage appdir
 
