@@ -28,6 +28,7 @@ install:
   - sudo dpkg -i /tmp/patchelf_0.8-2_amd64.deb
   - mkdir -p appdir/usr/bin
   - cp ./znx appdir/usr/bin
+  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a usr/bin/znx-wrapper
   # - ln -s usr/bin/znx appdir/AppRun
   - bash ./copier /usr/bin/grub-mkimage appdir
   - bash ./copier /usr/bin/zsync appdir
@@ -41,8 +42,6 @@ install:
   - find ./lib/x86_64-linux-gnu/ -type f -exec patchelf --set-rpath '$ORIGIN/./' {} \;
   - patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu/' usr/bin/grub-mkimage
   - find ./ -type f
-  - echo 'ZNX=$(find ./ -name znx)' | tee AppRun
-  - echo 'PATH=$PATH:$(dirname $ZNX) $ZNX "$@"' | tee -a AppRun
   - cd ..
 
 script:
