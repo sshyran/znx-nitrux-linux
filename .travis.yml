@@ -40,9 +40,9 @@ script:
 
 after_success:
   - mkdir out
-  - mv ./znx*.AppImage ./out/
-  - md5sum ./out/znx*.AppImage > ./out/MD5-$VERSION.txt
-  - curl --upload-file ./out/znx*.AppImage https://transfer.sh/
+  - mv ./ZNX*.AppImage ./out/
+  - md5sum ./out/ZNX*.AppImage > ./out/MD5-$VERSION.txt
+  - curl --upload-file ./out/ZNX*.AppImage https://transfer.sh/
 
 branches:
   except:
