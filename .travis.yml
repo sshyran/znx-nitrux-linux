@@ -21,7 +21,7 @@ before_install:
   - chmod a+x copier
   - chmod a+x znx
   - wget http://mirrors.kernel.org/ubuntu/pool/main/c/coreutils/realpath_8.25-2ubuntu2_all.deb -O realpath.deb
-  - dpkg -i realpath.deb
+  - sudo dpkg -i realpath.deb
 
 script:
   - mkdir -p appdir/usr/bin
