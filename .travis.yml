@@ -29,7 +29,8 @@ install:
   - cp /usr/bin/grub-mkimage appdir/usr/bin/
   - cp /usr/bin/zsync appdir/usr/bin/
   - cd appdir
-  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee usr/bin/znx-wrapper
+  - echo '#!/bin/sh' | tee usr/bin/znx-wrapper
+  - echo 'PATH=$PATH:${APPDIR}/usr/bin ${APPDIR}/usr/bin/znx "$@"' | tee -a usr/bin/znx-wrapper
   - chmod a+x usr/bin/znx-wrapper
   - ln -s ./usr/bin/znx-wrapper AppRun
   - chmod 777 AppRun
