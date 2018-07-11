@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=ZNX
-Exec=znx-wrapper
-Icon=znx
-Comment="znx is a tool that lets you deploy multiple operating systems (and keep them updated, too) without having to repartition the drives, without extracting contents to them. It's all about simplicity and reliability"
-Terminal=true
-Categories=Utility;

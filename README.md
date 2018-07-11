@@ -8,7 +8,7 @@ For more information about how `znx` works, please refer to the [documentation](
 
 In the image below, you can see `znx`'s boot menu.
 
-![](img/preview.png)
+![](https://i.imgur.com/YcBBARM.png)
 
 
 To try it out, just grab an USB stick or and external drive and run:
@@ -18,5 +18,5 @@ To try it out, just grab an USB stick or and external drive and run:
 # ./znx deploy ubuntu/xenial http://cdimage.ubuntu.com/xenial/daily-live/current/xenial-desktop-amd64.iso.zsync
 ```
 
-Be sure to replace `/dev/sdb` with the actual device name of your USB drive.
+Be sure to replace `/dev/sdb` with the actual device name of your device.
 Those commands will, first, initialize the device, and, second, deploy Ubuntu Xenial on the device. Reboot.
