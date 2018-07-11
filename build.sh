@@ -3,7 +3,8 @@
 # -- Install dependencies.
 
 apt-get update
-apt-get install wget gdisk zsync util-linux btrfs-progs dosfstools grub-common grub-efi-amd64-bin
+apt-get install wget patchelf
+apt-get install gdisk zsync util-linux btrfs-progs dosfstools grub-common grub-efi-amd64-bin
 
 wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
@@ -82,4 +83,8 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	find usr/sbin -type f -exec patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu' {} \;
 )
 
-ARCH=x84_64 ./appimagetool appdir app
+wget https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimage-wrapper
+chmod a+x appimage-wrapper
+
+mkdir out
+ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx
