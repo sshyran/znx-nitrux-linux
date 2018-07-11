@@ -5,7 +5,7 @@ script:
 
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - ./upload.sh out/*
+  - sh upload.sh out/*
 
 branches:
   except:

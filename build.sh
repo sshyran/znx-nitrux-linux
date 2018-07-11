@@ -6,8 +6,8 @@ apt-get update
 apt-get install -qy wget patchelf file
 apt-get install -qy gdisk zsync util-linux btrfs-progs dosfstools grub-common grub-efi-amd64-bin
 
-wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-wget https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
+wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
 
 chmod +x appimagetool
 chmod +x copier
@@ -64,14 +64,14 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 (
 	cd appdir
 
-	wget https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
+	wget -q https://raw.githubusercontent.com/AppImage/AppImages/master/functions.sh
 	chmod +x functions.sh
 	. ./functions.sh
 	delete_blacklisted
 	rm functions.sh
 
-	wget -O AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64
-	wget -O runtime https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
+	wget -qO AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64
+	wget -qO runtime https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
 
 	chmod a+x AppRun
 	chmod a+x runtime
@@ -83,7 +83,7 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	find usr/sbin -type f -exec patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu' {} \;
 )
 
-wget https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimage-wrapper
+wget -q https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimage-wrapper
 chmod a+x appimage-wrapper
 
 mkdir out
