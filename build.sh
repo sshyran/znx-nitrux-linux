@@ -3,7 +3,7 @@
 # -- Install dependencies.
 
 apt-get update
-apt-get install -qy wget patchelf
+apt-get install -qy wget patchelf file
 apt-get install -qy gdisk zsync util-linux btrfs-progs dosfstools grub-common grub-efi-amd64-bin
 
 wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
