@@ -52,6 +52,7 @@ chmod a+x appdir/bin/wrapper
 ./copier sgdisk appdir
 ./copier mkfs.vfat appdir
 ./copier mkfs.btrfs appdir
+./copier mountpoint appdir
 ./copier grub-install appdir
 ./copier grub-mkimage appdir
 
@@ -79,7 +80,7 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	find lib/x86_64-linux-gnu -type f -exec patchelf --set-rpath '$ORIGIN/././' {} \;
 	find bin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
 	find sbin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
-	find usr/bin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
+	find usr/bin -type f -exec patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu' {} \;
 	find usr/sbin -type f -exec patchelf --set-rpath '$ORIGIN/../../lib/x86_64-linux-gnu' {} \;
 )
 
