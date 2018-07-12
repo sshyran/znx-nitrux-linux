@@ -1,7 +1,7 @@
 sudo: required
 
 script:
-  - sudo docker run --rm -v $(pwd)/:/build/ -w /build/ ubuntu:bionic /bin/sh build.sh
+  - sudo docker run --rm -v $(pwd)/:/build/ -w /build/ ubuntu:xenial /bin/sh build.sh
 
 after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
