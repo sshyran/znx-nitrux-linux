@@ -80,27 +80,13 @@ case $COMMAND in
 		PREFIX=$(dirname $(readlink -f $0))
 
 		echo "Wiping $DEVICE. Please wait."
-		sgdisk -zo $DEVICE \
-			-n 1::8M -t 1:EF02 -c 1:ZNX_MBR $DEVICE \
-			-n 2::16M -t 2:EF00 -c 2:ZNX_BOOT $DEVICE \
-			-N 3 -t 3:8300 -c 3:ZNX_DATA $DEVICE
+		sgdisk -Zo $DEVICE \
+			-n 1::16M -t 1:EF00 -c 1:ZNX_BOOT $DEVICE \
+			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
 		for d in $DEVICE*; do
 
-			# -- Prepare the boot partitions.
-
-			blkid $d | grep ZNX_MBR && {
-				mkfs.vfat $d
-				mount $d $ZNX_DIR || \
-					error "Unable to mount $d! Device initialization failed."
-
-				mkdir $ZNX_DIR/boot
-
-				grub-install --target=i386-pc --force --recheck --boot-directory=$ZNX_DIR/boot $DEVICE
-				grub-install --target=i386-pc --force --recheck --boot-directory=$ZNX_DIR/boot $d
-
-				cp $PREFIX/grub.cfg $ZNX_DIR/boot/grub
-			}
+			# -- Prepare the boot partition.
 
 			blkid $d | grep -q ZNX_BOOT && {
 				mkfs.vfat $d
@@ -127,13 +113,14 @@ case $COMMAND in
 			# -- Prepare the data partition.
 
 			blkid $d | grep -q ZNX_DATA && {
-				mkfs.btrfs -qf $d
+				mkfs.btrfs -f $d
 				mount $d $ZNX_DIR || \
 					error "Unable to mount $d! Device initialization failed."
 
 				mkdir -p $ZNX_DIR/boot_images
-				mkdir -p $ZNX_DIR/apps
-				mkdir -p $ZNX_DIR/data
+				mkdir -p \
+					$ZNX_DIR/data/config \
+					$ZNX_DIR/data/user
 			}
 
 		done
@@ -148,7 +135,7 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		echo $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' || \
-			error "IMAGE must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
+			error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 
 		_mount
 		echo "Deploying $IMAGE."
@@ -159,14 +146,13 @@ case $COMMAND in
 			mkdir -p $ZNX_DIR/boot_images/$IMAGE
 		fi
 
-		cp -u $URL $ZNX_DIR/boot_images/$IMAGE 2> /dev/null || \
-			cd $ZNX_DIR/boot_images/$IMAGE && \
+		cp $URL $ZNX_DIR/boot_images/$IMAGE || (
+			cd $ZNX_DIR/boot_images/$IMAGE
 			zsync $URL
-
-		[ $? -ne 0 ] && \
-			
-			rm -rf $ZNX_DIR/boot_images/$IMAGE && \
+		) || {
+			rm -rf $ZNX_DIR/boot_images/$IMAGE
 			error "Failed to deploy $IMAGE."
+		}
 
 		echo "Successfully deployed \e[32m$IMAGE\e[0m."
 
@@ -185,8 +171,7 @@ case $COMMAND in
 
 		UPDATE_URL=$(echo $(dd if=*.iso bs=1 seek=33651 count=512 2> /dev/null))
 
-		cd $ZNX_DIR/boot_images/$IMAGE && \
-			zsync ${URL:-$UPDATE_URL} || \
+		zsync ${URL:-$UPDATE_URL} || \
 			error "Failed to access ${URL:-$UPDATE_URL}."
 
 		echo "Successfully updated $IMAGE."
@@ -206,7 +191,7 @@ case $COMMAND in
 
 		mv -f *.zs-old *.iso && \
 			echo "Sucessfully performed rollback on $IMAGE." || \
-			error "Couldn't rollback $IMAGE."
+			error "Couldn't perform the rollback on $IMAGE."
 
 	;;
 
@@ -240,9 +225,6 @@ case $COMMAND in
 		rm -rf $ZNX_DIR/boot_images/$IMAGE && \
 			echo "Successfully removed \e[32m$IMAGE\e[0m."
 
-		[ -d $ZNX_DIR/boot_images/$IMAGE/* ] ||
-			rm -rf $ZNX_DIR/boot_images/${IMAGE%%/*}
-
 	;;
 
 	list)
@@ -255,7 +237,8 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images
 
 		for x in */*; do
-			echo -e "\e[36m${x}\e[0m"
+			[ -f $x ] && \
+				echo -e "\e[36m${x}\e[0m"
 		done
 
 	;;
