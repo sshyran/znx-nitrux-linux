@@ -2,9 +2,9 @@
 
 # -- Install dependencies.
 
-apt-get update
-apt-get install -qy wget patchelf file
-apt-get install -qy gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
+apt-get -qy update
+apt-get -qy install wget patchelf file
+apt-get -qy install busybox-static gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
@@ -17,7 +17,7 @@ chmod a+x znx
 # -- Populate the 'appdir' directory.
 
 mkdir -p appdir/bin
-cp znx appdir/bin
+cp znx appdir
 
 echo '
 [Desktop Entry]
@@ -40,7 +40,7 @@ echo '
 
 export LD_LIBRARY_PATH=$APPDIR/usr/lib:$LD_LIBRARY_PATH
 export PATH=$PATH:$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$APPDIR/usr/sbin
-$APPDIR/bin/znx $@' > appdir/bin/wrapper
+$APPDIR/znx $@' > appdir/bin/wrapper
 
 chmod a+x appdir/bin/wrapper
 
@@ -77,10 +77,8 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	rm functions.sh
 
 	wget -qO AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64
-	wget -qO runtime https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
 
 	chmod a+x AppRun
-	chmod a+x runtime
 
 	find lib/x86_64-linux-gnu -type f -exec patchelf --set-rpath '$ORIGIN/././' {} \;
 	find bin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
