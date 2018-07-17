@@ -7,7 +7,7 @@ DEVICE=$2
 IMAGE=$3
 URL=$4
 
-ZNX_DIR=$(mktemp -d /tmp/znx-XXXX)
+ZNX_DIR=$(mktemp -d)
 
 
 # -- Helper functions.

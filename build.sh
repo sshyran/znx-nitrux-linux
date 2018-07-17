@@ -77,8 +77,10 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	rm functions.sh
 
 	wget -qO AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64
+	wget -qO AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
 
 	chmod a+x AppRun
+	chmod a+x runtime
 
 	find lib/x86_64-linux-gnu -type f -exec patchelf --set-rpath '$ORIGIN/././' {} \;
 	find bin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
