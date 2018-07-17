@@ -18,6 +18,7 @@ chmod a+x znx
 
 mkdir -p appdir/bin
 cp znx appdir
+cp grub.cfg appdir
 
 echo '
 [Desktop Entry]
@@ -49,6 +50,7 @@ chmod a+x appdir/bin/wrapper
 
 ./copier busybox appdir
 /bin/busybox --install -s appdir/bin
+
 
 # -- Copy binaries and its dependencies to appdir.
 
