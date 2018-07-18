@@ -1,6 +1,6 @@
 #! /bin/sh
 
-set -ex
+set -e
 
 COMMAND=$1
 DEVICE=$2
@@ -140,11 +140,10 @@ case $COMMAND in
 		_mount
 		echo "Deploying $IMAGE."
 
-		if [ -d $ZNX_DIR/boot_images/$IMAGE ]; then
+		[ -d $ZNX_DIR/boot_images/$IMAGE ] && \
 			error "Deployment aborted: $IMAGE is already deployed."
-		else
-			mkdir -p $ZNX_DIR/boot_images/$IMAGE
-		fi
+
+		mkdir -p $ZNX_DIR/boot_images/$IMAGE
 
 		cp $URL $ZNX_DIR/boot_images/$IMAGE || (
 			cd $ZNX_DIR/boot_images/$IMAGE
@@ -191,7 +190,7 @@ case $COMMAND in
 
 		mv -f *.zs-old *.iso && \
 			echo "Sucessfully performed rollback on $IMAGE." || \
-			error "Couldn't perform the rollback on $IMAGE."
+			error "Couldn't perform a rollback on $IMAGE."
 
 	;;
 
@@ -219,7 +218,7 @@ case $COMMAND in
 		_mount
 		echo "Removing $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE || \
+		[ -d $ZNX_DIR/boot_images/$IMAGE ] || \
 			error "$IMAGE is not deployed."
 
 		rm -rf $ZNX_DIR/boot_images/$IMAGE && \
