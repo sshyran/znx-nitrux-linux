@@ -6,7 +6,7 @@
 
 # -- Prepare the temporary directory
 
-for d in $(awk '{ print $4 }'); do
+for d in $(awk '{ print $4 }' /proc/partitions); do
 
 	[ -b /dev/$d ] || continue
 
