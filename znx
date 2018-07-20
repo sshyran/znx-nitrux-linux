@@ -119,8 +119,8 @@ case $COMMAND in
 
 				mkdir -p $ZNX_DIR/boot_images
 				mkdir -p \
-					$ZNX_DIR/data/config \
-					$ZNX_DIR/data/user
+					$ZNX_DIR/data/etc \
+					$ZNX_DIR/data/home
 			}
 
 		done
@@ -236,7 +236,7 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images
 
 		for x in */*; do
-			[ -f $x ] && \
+			[ -d $x ] && \
 				echo -e "\e[36m${x}\e[0m"
 		done
 
@@ -245,3 +245,10 @@ case $COMMAND in
 	*) error "No such command '$COMMAND'.";;
 
 esac
+
+
+# -- Remove empty directories.
+
+[ ${#IMAGE} -gt 0 ] && \
+	[ -d $ZNX_DIR/boot_images/${IMAGE%/*}/* ] && \
+		rm -r $ZNX_DIR/boot_images/${IMAGE%/*}

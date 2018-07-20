@@ -20,3 +20,5 @@ To try it out, just grab an USB stick or and external drive and run:
 
 Be sure to replace `/dev/sdb` with the actual device name of your device.
 Those commands will, first, initialize the device, and, second, deploy Ubuntu Xenial on the device. Reboot.
+
+To save your data, please download and run the `persistence.sh` script found in this repository.

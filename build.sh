@@ -36,14 +36,15 @@ touch appdir/znx.png
 
 # -- Create a wrapper script.
 
-echo '
-#! /bin/sh -x
+echo \
+'#! /bin/sh
 
 export LD_LIBRARY_PATH=$APPDIR/usr/lib:$LD_LIBRARY_PATH
 export PATH=$PATH:$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$APPDIR/usr/sbin
-$APPDIR/znx $@' > appdir/bin/wrapper
+exec $APPDIR/znx $@
+' > appdir/AppRun
 
-chmod a+x appdir/bin/wrapper
+chmod a+x appdir/AppRun
 
 
 # -- Install busybox.
@@ -59,7 +60,6 @@ chmod a+x appdir/bin/wrapper
 ./copier sgdisk appdir
 ./copier mkfs.vfat appdir
 ./copier mkfs.btrfs appdir
-./copier mountpoint appdir
 ./copier grub-install appdir
 ./copier grub-mkimage appdir
 
@@ -78,10 +78,7 @@ cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
 	delete_blacklisted
 	rm functions.sh
 
-	wget -qO AppRun https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64
 	wget -qO runtime https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
-
-	chmod a+x AppRun
 	chmod a+x runtime
 
 	find lib/x86_64-linux-gnu -type f -exec patchelf --set-rpath '$ORIGIN/././' {} \;
