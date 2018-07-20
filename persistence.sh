@@ -17,7 +17,7 @@ for d in $(awk '{ print $4 }' /proc/partitions); do
 		mkdir $HOME/storage
 		chown $(id -un) $HOME/storage
 		chmod 700 $HOME/storage
-		mount $s $HOME/storage
+		sudo mount $s $HOME/storage
 
 		break
 	}
