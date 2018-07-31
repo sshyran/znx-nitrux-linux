@@ -8,20 +8,26 @@
 
 STORAGE=$HOME/storage
 
+
+# Find where is the boot device mounted at and bind-mount the /home
+# directory.
+
 for d in $(awk '{ print $4 }' /proc/partitions); do
 
-	[ -b /dev/$d ] || continue
+	p=/dev/$d
 
+	[ -b $p ] || \
+		continue
 
-	blkid /dev/$d | grep -q ZNX_DATA && {
-		p=/dev/$d
+	blkid $p | grep -q ZNX_DATA && {
 
 		mkdir -p $STORAGE
 		chown $(id -un) $STORAGE
-		chmod 700 $STORAGE
+		chmod 744 $STORAGE
 
 		sudo mount -o bind $(grep $p /proc/mounts | cut -d ' ' -f 2) $STORAGE
 		break
+
 	}
 
 done
