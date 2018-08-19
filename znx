@@ -93,20 +93,12 @@ case $COMMAND in
 				mount $d $ZNX_DIR || \
 					error "Unable to mount $d! Device initialization failed."
 
-				mkdir -p $ZNX_DIR/efi/boot
-				mkdir -p $ZNX_DIR/boot
+				mkdir -p \
+					$ZNX_DIR/efi/boot \
+					$ZNX_DIR/boot/grub
 
-				grub-mkimage -C xz -O x86_64-efi \
-					-o $ZNX_DIR/efi/boot/bootx64.efi \
-					-d $PREFIX/grub-modules \
-					boot linux search normal configfile \
-					part_gpt btrfs fat iso9660 loopback \
-					test keystatus gfxmenu regexp probe \
-					efi_gop efi_uga all_video gfxterm font \
-					echo read ls cat png jpeg halt reboot
-
-				mkdir -p $ZNX_DIR/boot/grub
 				cp $PREFIX/grub.cfg $ZNX_DIR/boot/grub
+				cp $PREFIX/bootx64.efi $ZNX_DIR/efi/boot
 
 			}
 

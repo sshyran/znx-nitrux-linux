@@ -60,11 +60,19 @@ chmod a+x appdir/AppRun
 ./copier sgdisk appdir
 ./copier mkfs.vfat appdir
 ./copier mkfs.btrfs appdir
-./copier grub-install appdir
-./copier grub-mkimage appdir
 
-mkdir -p appdir/grub-modules
-cp /usr/lib/grub/x86_64-efi/* appdir/grub-modules
+
+# -- Build GRUB's boot image.
+
+grub-mkimage \
+	-C xz \
+	-O x86_64-efi \
+	-o bootx64.efi \
+	boot linux search normal configfile \
+	part_gpt btrfs fat iso9660 loopback \
+	test keystatus gfxmenu regexp probe \
+	efi_gop efi_uga all_video gfxterm font \
+	echo read ls cat png jpeg halt reboot
 
 
 # -- Generate the AppImage.
