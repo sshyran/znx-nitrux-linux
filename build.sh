@@ -2,9 +2,9 @@
 
 # -- Install dependencies.
 
-apt-get -qy update
-apt-get -qy install wget patchelf file
-apt-get -qy install busybox-static gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
+apt-get -qq -y update
+apt-get -qq -y install wget patchelf file libcairo2
+apt-get -qq -y install busybox-static gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
