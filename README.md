@@ -19,11 +19,9 @@ To try it out, just grab an USB stick or and external drive and run:
 
 ```
 # ./znx init /dev/sdb
-# ./znx deploy ubuntu/xenial http://cdimage.ubuntu.com/xenial/daily-live/current/xenial-desktop-amd64.iso.zsync
+# ./znx deploy /dev/sdb nitrux/continuous http://88.198.66.58:8000/nitrux.iso.zsync
 ```
 
 Be sure to replace `/dev/sdb` with the actual device name of your device.
-Those commands will, first, initialize the device, and, second, deploy Ubuntu Xenial on the device. Reboot.
-
-To save your data, please download and run the `persistence.sh` script found in this repository (run as a normal
-user, not as root).
+Those commands will, first, initialize the device, and, second, deploy the nitrux/testing image 
+on the device. Reboot.
