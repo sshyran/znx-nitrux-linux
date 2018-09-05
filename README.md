@@ -1,3 +1,7 @@
+# znx
+
+[![Build Status](https://travis-ci.org/Nitrux/znx.svg?branch=master)](https://travis-ci.org/Nitrux/znx)
+
 `znx` allows the user to perform the following:
 
 - Make parallel deployments of bootable ISO images (Linux-based distributions are expected).
