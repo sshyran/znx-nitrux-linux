@@ -10,7 +10,7 @@ URL=$4
 ZNX_DIR=$(mktemp -d)
 
 
-# -- Helper functions.
+# Helper functions.
 
 error () {
 	echo "znx: \e[31mError:\e[0m $@" >& 2
@@ -45,7 +45,7 @@ clean () {
 trap clean EXIT HUP INT TERM
 
 
-# -- Sanity checks.
+# Sanity checks.
 
 [ $# -eq 0 ] && \
 	error "No command given!"
@@ -60,12 +60,12 @@ echo $DEVICE | grep -q '[0-9]' && \
 	error "Please provide a block device name, not a partition."
 
 
-# -- Prepare the temporary directory.
+# Prepare the temporary directory.
 
 mkdir -p $ZNX_DIR
 
 
-# -- Run the specified command.
+# Run the specified command.
 
 case $COMMAND in
 
@@ -80,13 +80,13 @@ case $COMMAND in
 		PREFIX=$(dirname $(readlink -f $0))
 
 		echo "Wiping $DEVICE. Please wait."
-		sgdisk -Zo $DEVICE \
+		sgdisk -Z \
 			-n 1::16M -t 1:EF00 -c 1:ZNX_BOOT \
 			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
 		for d in $DEVICE*; do
 
-			# -- Prepare the boot partition.
+			# Prepare the boot partition.
 
 			blkid $d | grep -q ZNX_BOOT && {
 				mkfs.vfat $d
@@ -102,7 +102,7 @@ case $COMMAND in
 
 			}
 
-			# -- Prepare the data partition.
+			# Prepare the data partition.
 
 			blkid $d | grep -q ZNX_DATA && {
 				mkfs.btrfs -f $d
@@ -239,8 +239,8 @@ case $COMMAND in
 esac
 
 
-# -- Remove empty directories.
+# Remove empty directories.
 
-[ ${#IMAGE} -gt 0 ] && \
-	[ -d $ZNX_DIR/boot_images/${IMAGE%/*}/* ] && \
-		rm -r $ZNX_DIR/boot_images/${IMAGE%/*}
+#[ ${#IMAGE} -gt 0 ] && \
+#	[ -f $ZNX_DIR/boot_images/${IMAGE}/*.iso ] || \
+#		rm -r $ZNX_DIR/boot_images/${IMAGE%/*}
