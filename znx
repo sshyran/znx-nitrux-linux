@@ -160,10 +160,10 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images/$IMAGE || \
 			error "$IMAGE is not deployed."
 
-		UPDATE_URL=$(echo $(dd if=*.iso bs=1 seek=33651 count=512 2> /dev/null))
+		UPDATE_URL=$(echo $(dd if=$(find -type f -name *.iso) bs=1 seek=33651 count=512 2> /dev/null))
 
-		zsync ${URL:-$UPDATE_URL} || \
-			error "Failed to access ${URL:-$UPDATE_URL}."
+		zsync $UPDATE_URL || \
+			error "Failed to update $IMAGE."
 
 		echo "Successfully updated $IMAGE."
 
