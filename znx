@@ -81,7 +81,7 @@ case $COMMAND in
 
 		echo "Wiping $DEVICE. Please wait."
 		sgdisk -Z \
-			-n 1::16M -t 1:EF00 -c 1:ZNX_BOOT \
+			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
 			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
 		for d in $DEVICE*; do
