@@ -20,8 +20,8 @@ mkdir -p appdir/bin
 cp znx appdir
 cp grub.cfg appdir
 
-echo '
-[Desktop Entry]
+printf \
+'[Desktop Entry]
 Type=Application
 Name=znx
 Exec=wrapper
@@ -36,7 +36,7 @@ touch appdir/znx.png
 
 # -- Create a wrapper script.
 
-echo \
+printf \
 '#! /bin/sh
 
 export LD_LIBRARY_PATH=$APPDIR/usr/lib:$LD_LIBRARY_PATH
