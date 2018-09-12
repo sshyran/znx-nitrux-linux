@@ -9,6 +9,51 @@ URL=$4
 
 ZNX_DIR=$(mktemp -d)
 
+HELP=\
+"Usage: znx COMMAND DEVICE [IMAGE] [URL | PATH]
+
+COMMAND is one of:
+
+  - init:
+    Initializes the storage device for its further usage.
+    The DEVICE parameter must be passed.
+
+  - deploy:
+    Deploys an image on a storage device.
+    The image name must comply the regular expression:
+    ^[[a-zA-Z0-9]_-]+/[[a-zA-Z0-9]_-]+$
+    e.g. nitrux/rolling, nitrux/release_v1-01.
+    The DEVICE, IMAGE and URL or PATH parameters must be
+    passed. In case a URL is passed, it should point to
+    a zsync file.
+
+  - update:
+    Updates an already deployed image. The image should
+    have proper information in order to proceed with the
+    update, otherwise it fails.
+    The DEVICE and IMAGE parameters must be passed.
+
+  - rollback:
+    Revert an update of an image. If the image hadn't been
+    updated previously, it will fail.
+    The DEVICE and IMAGE parameters must be passed.
+
+  - clean:
+    Removes the backup that is created during an update.
+    The DEVICE and IMAGE parameters must be passed.
+
+  - remove:
+    Removes all data associated to the specified image,
+    as well as the image.
+    The DEVICE and IMAGE parameters must be passed.
+
+  - list:
+    Shows a list of the installed images.
+
+  - help:
+    Show this help.
+"
+
 
 # Helper functions.
 
@@ -21,15 +66,15 @@ _mount () {
 	for d in $DEVICE*; do
 
 		blkid $d | grep -q ZNX_DATA && {
-			grep -q $DEVICE /proc/mounts && \
-				mount -o bind $(grep $d /proc/mounts | cut -d ' ' -f 2) $ZNX_DIR || \
-				mount $d $ZNX_DIR || \
+			grep -q $DEVICE /proc/mounts &&
+				mount -o bind $(grep $d /proc/mounts | cut -d ' ' -f 2) $ZNX_DIR ||
+				mount $d $ZNX_DIR ||
 				error "Unable to mount $d! Exiting now."
 		}
 
 	done
 
-	mountpoint -q $ZNX_DIR || \
+	mountpoint -q $ZNX_DIR ||
 		error "Device isn't being managed by znx. You must initialize it first."
 
 }
@@ -47,16 +92,16 @@ trap clean EXIT HUP INT TERM
 
 # Sanity checks.
 
-[ $# -eq 0 ] && \
+[ $# -eq 0 ] &&
 	error "No command given!"
 
-[ $(id -u) -ne 0 ] && \
+[ $(id -u) -ne 0 ] &&
 	error "You are not the super user."
 
-[ ! -b $DEVICE ] && \
+[ ! -b $DEVICE ] &&
 	error "$DEVICE is not a block device"
 
-echo $DEVICE | grep -q '[0-9]' && \
+echo $DEVICE | grep -q '[0-9]' &&
 	error "Please provide a block device name, not a partition."
 
 
@@ -71,10 +116,10 @@ case $COMMAND in
 
 	init)
 
-		[ $# -ne 2 ] && \
+		[ $# -ne 2 ] &&
 			error "Bad command: wrong number of arguments."
 
-		grep -q $DEVICE /proc/mounts && \
+		grep -q $DEVICE /proc/mounts &&
 			error "Device is mounted! Unmount it before continuing."
 
 		PREFIX=$(dirname $(readlink -f $0))
@@ -90,7 +135,7 @@ case $COMMAND in
 
 			blkid $d | grep -q ZNX_BOOT && {
 				mkfs.vfat $d
-				mount $d $ZNX_DIR || \
+				mount $d $ZNX_DIR ||
 					error "Unable to mount $d! Device initialization failed."
 
 				mkdir -p \
@@ -106,13 +151,13 @@ case $COMMAND in
 
 			blkid $d | grep -q ZNX_DATA && {
 				mkfs.btrfs -f $d
-				mount $d $ZNX_DIR || \
+				mount $d $ZNX_DIR ||
 					error "Unable to mount $d! Device initialization failed."
 
-				mkdir -p $ZNX_DIR/boot_images
 				mkdir -p \
 					$ZNX_DIR/data/etc \
-					$ZNX_DIR/data/home
+					$ZNX_DIR/data/home \
+					$ZNX_DIR/boot_images
 			}
 
 		done
@@ -123,16 +168,16 @@ case $COMMAND in
 
 	deploy)
 
-		[ $# -ne 4 ] && \
+		[ $# -ne 4 ] &&
 			error "Bad command: wrong number of arguments."
 
-		echo $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' || \
+		echo $IMAGE | grep -qE '^[[a-zA-Z0-9]_-]+/[[a-zA-Z0-9]_-]+$' ||
 			error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 
 		_mount
 		echo "Deploying $IMAGE."
 
-		[ -d $ZNX_DIR/boot_images/$IMAGE ] && \
+		[ -d $ZNX_DIR/boot_images/$IMAGE ] &&
 			error "Deployment aborted: $IMAGE is already deployed."
 
 		mkdir -p $ZNX_DIR/boot_images/$IMAGE
@@ -151,18 +196,18 @@ case $COMMAND in
 
 	update)
 
-		[ $# -eq 3 -o $# -eq 4 ] || \
+		[ $# -eq 3 -o $# -eq 4 ] ||
 			error "Bad command: wrong number of arguments."
 
 		_mount
 		echo "Updating $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE || \
+		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		UPDATE_URL=$(echo $(dd if=$(find -type f -name *.iso) bs=1 seek=33651 count=512 2> /dev/null))
+		UPDATE_URL=$(echo $(dd if=$(echo *.iso) bs=1 seek=33651 count=512 2> /dev/null))
 
-		zsync $UPDATE_URL || \
+		zsync $UPDATE_URL ||
 			error "Failed to update $IMAGE."
 
 		echo "Successfully updated $IMAGE."
@@ -171,56 +216,57 @@ case $COMMAND in
 
 	rollback)
 
-		[ $# -ne 3 ] && \
+		[ $# -ne 3 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
 		echo "Performing rollback on $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE || \
+		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		mv -f *.zs-old *.iso && \
-			echo "Sucessfully performed rollback on $IMAGE." || \
+		mv -f *.zs-old *.iso &&
+			echo "Sucessfully performed rollback on $IMAGE." ||
 			error "Couldn't perform a rollback on $IMAGE."
 
 	;;
 
 	clean)
 
-		[ $# -ne 3 ] && \
+		[ $# -ne 3 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
 		echo "Cleaning $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE || \
+		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed,"
 
-		rm -rf *.zs-old && \
-			echo "Sucessfully cleaned $IMAGE."
+		rm *.zs-old &&
+			echo "Sucessfully cleaned $IMAGE." ||
+			error "Nothing to clean."
 
 	;;
 
 	remove)
 
-		[ $# -ne 3 ] && \
+		[ $# -ne 3 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
 		echo "Removing $IMAGE."
 
-		[ -d $ZNX_DIR/boot_images/$IMAGE ] || \
+		[ -d $ZNX_DIR/boot_images/$IMAGE ] ||
 			error "$IMAGE is not deployed."
 
-		rm -rf $ZNX_DIR/boot_images/$IMAGE && \
+		rm -rf $ZNX_DIR/boot_images/$IMAGE &&
 			echo "Successfully removed \e[32m$IMAGE\e[0m."
 
 	;;
 
 	list)
 
-		[ $# -ne 2 ] && \
+		[ $# -ne 2 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
@@ -228,19 +274,18 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images
 
 		for x in */*; do
-			[ -d $x ] && \
+			[ -d $x ] &&
 				echo -e "\e[36m${x}\e[0m"
 		done
+
+	;;
+
+	help )
+
+		printf $HELP
 
 	;;
 
 	*) error "No such command '$COMMAND'.";;
 
 esac
-
-
-# Remove empty directories.
-
-#[ ${#IMAGE} -gt 0 ] && \
-#	[ -f $ZNX_DIR/boot_images/${IMAGE}/*.iso ] || \
-#		rm -r $ZNX_DIR/boot_images/${IMAGE%/*}
