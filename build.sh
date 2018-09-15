@@ -58,6 +58,7 @@ chmod a+x appdir/AppRun
 ./copier zsync appdir
 ./copier blkid appdir
 ./copier sgdisk appdir
+./copier wipefs appdir
 ./copier mkfs.vfat appdir
 ./copier mkfs.btrfs appdir
 

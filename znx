@@ -125,6 +125,7 @@ case $COMMAND in
 		PREFIX=$(dirname $(readlink -f $0))
 
 		echo "Wiping $DEVICE. Please wait."
+		wipefs -af $DEVICE
 		sgdisk -Z \
 			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
 			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
@@ -171,7 +172,7 @@ case $COMMAND in
 		[ $# -ne 4 ] &&
 			error "Bad command: wrong number of arguments."
 
-		echo $IMAGE | grep -qE '^[[a-zA-Z0-9]_-]+/[[a-zA-Z0-9]_-]+$' ||
+		echo $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
 			error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 
 		_mount
@@ -196,7 +197,7 @@ case $COMMAND in
 
 	update)
 
-		[ $# -eq 3 -o $# -eq 4 ] ||
+		[ $# -ne 4 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
