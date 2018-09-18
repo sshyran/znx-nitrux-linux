@@ -52,25 +52,23 @@ COMMAND is one of:
 
   - help:
     Show this help.
+
 "
 
 
 # Helper functions.
 
 error () {
-	echo "znx: \e[31mError:\e[0m $@" >& 2
+	printf "znx: \e[31mError:\e[0m $@\n" >& 2
 	exit 1
 }
 
 _mount () {
 	for d in $DEVICE*; do
 
-		blkid $d | grep -q ZNX_DATA && {
-			grep -q $DEVICE /proc/mounts &&
-				mount -o bind $(grep $d /proc/mounts | cut -d ' ' -f 2) $ZNX_DIR ||
-				mount $d $ZNX_DIR ||
-				error "Unable to mount $d! Exiting now."
-		}
+		blkid $d | grep -q ZNX_DATA &&
+			mount $d $ZNX_DIR ||
+			error "Unable to mount $d! Exiting now."
 
 	done
 
@@ -101,11 +99,11 @@ trap clean EXIT HUP INT TERM
 [ ! -b $DEVICE ] &&
 	error "$DEVICE is not a block device"
 
-echo $DEVICE | grep -q '[0-9]' &&
+printf $DEVICE | grep -q '[0-9]' &&
 	error "Please provide a block device name, not a partition."
 
 [ ! -n $IMAGE ] &&
-	echo $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
+	printf $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
 		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 
 
@@ -128,7 +126,7 @@ case $COMMAND in
 
 		PREFIX=$(dirname $(readlink -f $0))
 
-		echo "Wiping $DEVICE. Please wait."
+		printf "Wiping $DEVICE. Please wait.\n"
 		wipefs -af $DEVICE
 		sgdisk -Z \
 			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
@@ -167,7 +165,7 @@ case $COMMAND in
 
 		done
 
-		echo "Operation successful. Device is ready."
+		printf "Operation successful. Device is ready.\n"
 
 	;;
 
@@ -177,7 +175,7 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		echo "Deploying $IMAGE."
+		printf "Deploying $IMAGE.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] &&
 			error "Deployment aborted: $IMAGE is already deployed."
@@ -192,7 +190,7 @@ case $COMMAND in
 			error "Failed to deploy $IMAGE."
 		}
 
-		echo "Successfully deployed \e[32m$IMAGE\e[0m."
+		printf "Successfully deployed \e[32m$IMAGE\e[0m.\n"
 
 	;;
 
@@ -202,17 +200,17 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		echo "Updating $IMAGE."
+		printf "Updating $IMAGE.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		UPDATE_URL=$(echo $(dd if=$(echo *.iso) bs=1 skip=33651 count=512 2> /dev/null))
+		UPDATE_URL=$(printf $(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null))
 
 		zsync $UPDATE_URL ||
 			error "Failed to update $IMAGE."
 
-		echo "Successfully updated $IMAGE."
+		printf "Successfully updated $IMAGE.\n"
 
 	;;
 
@@ -222,13 +220,13 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		echo "Performing rollback on $IMAGE."
+		printf "Performing rollback on $IMAGE.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed."
 
 		mv -f *.zs-old *.iso &&
-			echo "Sucessfully performed rollback on $IMAGE." ||
+			printf "Sucessfully performed rollback on $IMAGE.\n" ||
 			error "Couldn't perform a rollback on $IMAGE."
 
 	;;
@@ -239,13 +237,13 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		echo "Cleaning $IMAGE."
+		printf "Cleaning $IMAGE.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "$IMAGE is not deployed,"
 
 		rm *.zs-old &&
-			echo "Sucessfully cleaned $IMAGE." ||
+			printf "Sucessfully cleaned $IMAGE.\n" ||
 			error "Nothing to clean."
 
 	;;
@@ -257,13 +255,13 @@ case $COMMAND in
 
 		_mount
 		check_name $IMAGE
-		echo "Removing $IMAGE."
+		printf "Removing $IMAGE.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] ||
 			error "$IMAGE is not deployed."
 
 		rm -rf $ZNX_DIR/boot_images/$IMAGE &&
-			echo "Successfully removed \e[32m$IMAGE\e[0m."
+			printf "Successfully removed \e[32m$IMAGE\e[0m.\n"
 
 	;;
 
@@ -278,7 +276,7 @@ case $COMMAND in
 
 		for x in */*; do
 			[ -d $x ] &&
-				echo -e "\e[36m${x}\e[0m"
+				printf "\e[36m${x}\e[0m\n"
 		done
 
 	;;
