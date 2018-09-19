@@ -196,7 +196,7 @@ case $COMMAND in
 
 	update)
 
-		[ $# -ne 4 ] &&
+		[ $# -ne 3 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
