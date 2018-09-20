@@ -102,7 +102,7 @@ trap clean EXIT HUP INT TERM
 printf $DEVICE | grep -q '[0-9]' &&
 	error "Please provide a block device name, not a partition."
 
-[ -n $IMAGE ] &&
+[ ! -z $IMAGE ] &&
 	printf $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
 	error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 
