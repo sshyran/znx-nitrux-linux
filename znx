@@ -66,9 +66,10 @@ error () {
 _mount () {
 	for d in $DEVICE*; do
 
-		blkid $d | grep -q ZNX_DATA &&
+		blkid $d | grep -q ZNX_DATA && {
 			mount $d $ZNX_DIR ||
-			error "Unable to mount $d! Exiting now."
+				error "Unable to mount $d! Exiting now."
+		}
 
 	done
 
@@ -102,10 +103,10 @@ trap clean EXIT HUP INT TERM
 printf $DEVICE | grep -q '[0-9]' &&
 	error "Please provide a block device name, not a partition."
 
-[ ${#IMAGE} -gt 0 ] &&
+[ ${#IMAGE} -gt 0 ] && {
 	printf $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
-	error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
-
+		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
+}
 
 # Prepare the temporary directory.
 
