@@ -148,6 +148,7 @@ case $COMMAND in
 
 				cp $PREFIX/grub.cfg $ZNX_DIR/boot/grub
 				cp $PREFIX/bootx64.efi $ZNX_DIR/efi/boot
+				cp -r $PREFIX/themes $ZNX_DIR/boot/grub
 
 			}
 
