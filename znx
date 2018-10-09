@@ -119,7 +119,7 @@ case $COMMAND in
 
 	init)
 
-		[ $# -ne 2 ] ||
+		[ $# -eq 2 ] ||
 			error "Bad command: wrong number of arguments."
 
 		grep -q $DEVICE /proc/mounts &&
