@@ -119,11 +119,11 @@ case $COMMAND in
 
 	init)
 
-		[ $# -ne 2 ] &&
+		[ $# -ne 2 ] ||
 			error "Bad command: wrong number of arguments."
 
 		grep -q $DEVICE /proc/mounts &&
-			error "Device is mounted! Unmount it before continuing."
+			error "$DEVICE is mounted! Unmount it before continuing."
 
 		PREFIX=$(dirname $(readlink -f $0))
 
@@ -186,7 +186,8 @@ case $COMMAND in
 
 		cp $URL $ZNX_DIR/boot_images/$IMAGE || (
 			cd $ZNX_DIR/boot_images/$IMAGE
-			zsync $URL
+			zsync $URL ||
+				axel $URL
 		) || {
 			rm -rf $ZNX_DIR/boot_images/$IMAGE
 			error "Failed to deploy $IMAGE."

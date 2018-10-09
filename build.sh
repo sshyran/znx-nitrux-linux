@@ -4,7 +4,7 @@
 
 apt-get -qq -y update
 apt-get -qq -y install wget patchelf file libcairo2
-apt-get -qq -y install busybox-static gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
+apt-get -qq -y install busybox-static axel gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
@@ -14,7 +14,7 @@ chmod +x copier
 chmod a+x znx
 
 
-# -- Populate the 'appdir' directory.
+# -- Populate appdir.
 
 mkdir -p appdir/bin
 cp znx appdir
@@ -55,6 +55,7 @@ chmod a+x appdir/AppRun
 
 # -- Copy binaries and its dependencies to appdir.
 
+./copier axel appdir
 ./copier zsync appdir
 ./copier blkid appdir
 ./copier sgdisk appdir
