@@ -177,10 +177,10 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Deploying $IMAGE.\n"
+		printf "Deploying \e[32m$IMAGE\e[0m.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] &&
-			error "Deployment aborted: $IMAGE is already deployed."
+			error "Deployment aborted:  is already deployed."
 
 		mkdir -p $ZNX_DIR/boot_images/$IMAGE
 
@@ -190,7 +190,7 @@ case $COMMAND in
 				axel $URL
 		) || {
 			rm -rf $ZNX_DIR/boot_images/$IMAGE
-			error "Failed to deploy $IMAGE."
+			error "Failed to deploy \e[32m$IMAGE\e[0m."
 		}
 
 		printf "Successfully deployed \e[32m$IMAGE\e[0m.\n"
@@ -203,17 +203,29 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Updating $IMAGE.\n"
+		printf "Updating \e[32m$IMAGE\e[0m.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
-			error "$IMAGE is not deployed."
+			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		UPDATE_URL=$(printf $(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null))
 
-		zsync $UPDATE_URL ||
-			error "Failed to update $IMAGE."
+		grep -q $IMAGE /proc/cmdline && {
 
-		printf "Successfully updated $IMAGE.\n"
+			printf "The update will be applied on the next boot.\n"
+			rm .0
+
+			zsync -o pending-update $UPDATE_URL &&
+				: > .0 ||
+				error "Failed to update \e[32m$IMAGE\e[0m."
+				
+
+		} || {
+
+			zsync $UPDATE_URL &&
+				printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
+				error "Failed to update \e[32m$IMAGE\e[0m."
+		}
 
 	;;
 
@@ -223,14 +235,14 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Performing rollback on $IMAGE.\n"
+		printf "Performing rollback on \e[32m$IMAGE\e[0m.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
-			error "$IMAGE is not deployed."
+			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		mv -f *.zs-old *.iso &&
-			printf "Sucessfully performed rollback on $IMAGE.\n" ||
-			error "Couldn't perform a rollback on $IMAGE."
+			printf "Sucessfully performed rollback on \e[32m$IMAGE\e[0m.\n" ||
+			error "Couldn't perform a rollback on \e[32m$IMAGE\e[0m."
 
 	;;
 
@@ -240,13 +252,13 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Cleaning $IMAGE.\n"
+		printf "Cleaning \e[32m$IMAGE\e[0m.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
-			error "$IMAGE is not deployed,"
+			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		rm *.zs-old &&
-			printf "Sucessfully cleaned $IMAGE.\n" ||
+			printf "Sucessfully cleaned \e[32m$IMAGE\e[0m.\n" ||
 			error "Nothing to clean."
 
 	;;
@@ -258,10 +270,10 @@ case $COMMAND in
 
 		_mount
 		check_name $IMAGE
-		printf "Removing $IMAGE.\n"
+		printf "Removing \e[32m$IMAGE\e[0m.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] ||
-			error "$IMAGE is not deployed."
+			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		rm -rf $ZNX_DIR/boot_images/$IMAGE &&
 			printf "Successfully removed \e[32m$IMAGE\e[0m.\n"
