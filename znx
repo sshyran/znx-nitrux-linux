@@ -213,7 +213,7 @@ case $COMMAND in
 		grep -q $IMAGE /proc/cmdline && {
 
 			printf "The update will be applied on the next boot.\n"
-			rm .0
+			rm -f .0
 
 			zsync -o pending-update $UPDATE_URL &&
 				: > .0 ||
