@@ -20,7 +20,17 @@ mkdir -p appdir/bin
 cp znx appdir
 cp grub.cfg appdir
 
-printf '#\n' > appdir/znx.desktop
+printf \
+'[Desktop Entry]
+Type=Application
+Name=znx
+Exec=znx
+Icon=znx
+Comment="Operating system manager."
+Terminal=true
+Categories=Utility;
+OnlyShowIn=
+' > appdir/znx.desktop
 
 touch appdir/znx.png
 
