@@ -20,7 +20,7 @@ mkdir -p appdir/bin
 cp znx appdir
 cp grub.cfg appdir
 
-: > appdir/znx.desktop
+printf '#\n' > appdir/znx.desktop
 
 touch appdir/znx.png
 
