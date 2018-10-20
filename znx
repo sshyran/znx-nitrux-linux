@@ -185,12 +185,18 @@ case $COMMAND in
 		mkdir -p $ZNX_DIR/boot_images/$IMAGE
 
 		cp $URL $ZNX_DIR/boot_images/$IMAGE || (
+
 			cd $ZNX_DIR/boot_images/$IMAGE
-			zsync $URL ||
-				axel $URL
+
+			printf $IMAGE | grep 'zsync$' &&
+				zsync $URL ||
+				axel $URL > /dev/null
+
 		) || {
+
 			rm -rf $ZNX_DIR/boot_images/$IMAGE
 			error "Failed to deploy \e[32m$IMAGE\e[0m."
+
 		}
 
 		printf "Successfully deployed \e[32m$IMAGE\e[0m.\n"
@@ -210,22 +216,9 @@ case $COMMAND in
 
 		UPDATE_URL=$(printf $(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null))
 
-		grep -q $IMAGE /proc/cmdline && {
-
-			printf "The update will be applied on the next boot.\n"
-			rm -f .0
-
-			zsync -o pending-update $UPDATE_URL &&
-				: > .0 ||
-				error "Failed to update \e[32m$IMAGE\e[0m."
-				
-
-		} || {
-
-			zsync $UPDATE_URL &&
-				printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
-				error "Failed to update \e[32m$IMAGE\e[0m."
-		}
+		zsync $UPDATE_URL &&
+			printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
+			error "Failed to update \e[32m$IMAGE\e[0m."
 
 	;;
 
@@ -269,7 +262,6 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		check_name $IMAGE
 		printf "Removing \e[32m$IMAGE\e[0m.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] ||
