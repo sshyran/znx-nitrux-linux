@@ -97,7 +97,7 @@ trap clean EXIT HUP INT TERM
 [ $(id -u) -ne 0 ] &&
 	error "You are not the super user."
 
-[ ! -b $DEVICE ] &&
+[ -b $DEVICE ] ||
 	error "$DEVICE is not a block device"
 
 printf $DEVICE | grep -q '[0-9]' &&
@@ -180,7 +180,7 @@ case $COMMAND in
 		printf "Deploying \e[32m$IMAGE\e[0m.\n"
 
 		[ -d $ZNX_DIR/boot_images/$IMAGE ] &&
-			error "Deployment aborted:  is already deployed."
+			error "Deployment aborted: $IMAGE is already deployed."
 
 		mkdir -p $ZNX_DIR/boot_images/$IMAGE
 
@@ -188,7 +188,7 @@ case $COMMAND in
 
 			cd $ZNX_DIR/boot_images/$IMAGE
 
-			printf $IMAGE | grep 'zsync$' &&
+			printf $URL | grep -q 'zsync$' &&
 				zsync $URL ||
 				axel $URL > /dev/null
 
