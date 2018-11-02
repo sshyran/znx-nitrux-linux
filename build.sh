@@ -14,6 +14,11 @@ chmod +x copier
 chmod a+x znx
 
 
+# -- Write the commit that generated this build.
+
+sed -i "s/@GIT_COMMIT@/$(git rev-parse --short HEAD)/" znx
+
+
 # -- Populate appdir.
 
 mkdir -p appdir/bin
@@ -33,6 +38,7 @@ OnlyShowIn=
 ' > appdir/znx.desktop
 
 touch appdir/znx.png
+
 
 
 # -- Create a wrapper script.

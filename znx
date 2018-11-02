@@ -7,56 +7,57 @@ DEVICE=$2
 IMAGE=$3
 URL=$4
 
+VERSION=@GIT_COMMIT@
+
 ZNX_DIR=$(mktemp -d)
 
 HELP=\
-"Usage: znx COMMAND DEVICE [IMAGE] [URL | PATH]
+"Usage: znx [option] <command>
 
-COMMAND is one of:
+Options:
 
-  - init:
-    Initializes the storage device for its further usage.
-    The DEVICE parameter must be passed.
+  -v, --version                           Print the commit hash that generated this build.
+  -h, --help                              Print this help.
 
-  - deploy:
-    Deploys an image on a storage device.
-    The image name must comply the regular expression:
-    ^[[a-zA-Z0-9]_-]+/[[a-zA-Z0-9]_-]+$
-    e.g. nitrux/rolling, nitrux/release_v1-01.
-    The DEVICE, IMAGE and URL or PATH parameters must be
-    passed. In case a URL is passed, it should point to
-    a zsync file.
+Commands:
 
-  - update:
-    Updates an already deployed image. The image should
-    have proper information in order to proceed with the
-    update, otherwise it fails.
-    The DEVICE and IMAGE parameters must be passed.
+  init <device>                           Initialize the storage device.
+  deploy <device> <image> <URL | path>    Deploy an image on a storage device.
+  update <device> <image>                 Update the specified image.
+  revert <device> <image>                 Revert to the previous version of the image.
+  clean <device> <image>                  Remove the backup that is created during an update.
+  remove <device> <image>                 Remove the specified image.
+  list <device>                           List the deployed images.
 
-  - rollback:
-    Revert an update of an image. If the image hadn't been
-    updated previously, it will fail.
-    The DEVICE and IMAGE parameters must be passed.
+Examples:
 
-  - clean:
-    Removes the backup that is created during an update.
-    The DEVICE and IMAGE parameters must be passed.
+  Initialize a device:
+  - znx init /dev/sdX
 
-  - remove:
-    Removes all data associated to the specified image,
-    as well as the image.
-    The DEVICE and IMAGE parameters must be passed.
+  Deploy an image:
+  - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso.zsync
+  - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
+  - znx deploy /dev/sdX vendor/release image.iso
 
-  - list:
-    Shows a list of the installed images.
+  Update an image:
+  - znx update /dev/sdX vendor/release
 
-  - help:
-    Show this help.
+  Revert an update (downgrade):
+  - znx revert /dev/sdX vendor/release
+
+  Delete the previous version of an image (to save some space):
+  - znx clean /dev/sdX vendor/release
+
+  Remove an image:
+  - znx remove /dev/sdX vendor/release
+
+  See the deployed images on a device:
+  - znx list /dev/sdX
 
 "
 
 
-# Helper functions.
+# -- Helper functions.
 
 error () {
 	printf "znx: \e[31mError:\e[0m $@\n" >& 2
@@ -86,10 +87,13 @@ clean () {
 	rm -rf $ZNX_DIR
 }
 
+
+# -- Always perform a cleanup after exiting.
+
 trap clean EXIT HUP INT TERM
 
 
-# Sanity checks.
+# -- Sanity checks.
 
 [ $# -eq 0 ] &&
 	error "No command given!"
@@ -108,12 +112,13 @@ printf $DEVICE | grep -q '[0-9]' &&
 		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 }
 
-# Prepare the temporary directory.
+
+# -- Prepare the temporary directory.
 
 mkdir -p $ZNX_DIR
 
 
-# Run the specified command.
+# -- Run the specified command.
 
 case $COMMAND in
 
@@ -135,7 +140,7 @@ case $COMMAND in
 
 		for d in $DEVICE*; do
 
-			# Prepare the boot partition.
+			# -- Prepare the boot partition.
 
 			blkid $d | grep -q ZNX_BOOT && {
 				mkfs.vfat $d
@@ -152,7 +157,7 @@ case $COMMAND in
 
 			}
 
-			# Prepare the data partition.
+			# -- Prepare the data partition.
 
 			blkid $d | grep -q ZNX_DATA && {
 				mkfs.btrfs -f $d
@@ -283,16 +288,27 @@ case $COMMAND in
 
 		for x in */*; do
 			[ -d $x ] &&
-				printf "\e[36m${x}\e[0m\n"
+				printf "\e[36m$x\e[0m\n"
 		done
 
 	;;
 
-	help )
+	-h|--help )
 
 		printf "$HELP"
+
 	;;
 
-	*) error "No such command '$COMMAND'.";;
+	-v|--version )
+
+		printf "$VERSION"
+
+	;;
+
+	*)
+
+		error "No such command '$COMMAND'."
+
+	;;
 
 esac
