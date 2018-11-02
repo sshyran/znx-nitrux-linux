@@ -17,6 +17,7 @@ chmod a+x znx
 # -- Write the commit that generated this build.
 
 sed -i "s/@TRAVIS_COMMIT@/$TRAVIS_COMMIT/" znx
+echo COMMIT: $TRAVIS_COMMIT
 
 
 # -- Populate appdir.
