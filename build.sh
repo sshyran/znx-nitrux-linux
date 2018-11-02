@@ -16,7 +16,7 @@ chmod a+x znx
 
 # -- Write the commit that generated this build.
 
-sed -i "s/@GIT_COMMIT@/$(git rev-parse --short HEAD)/" znx
+sed -i "s/@TRAVIS_COMMIT@/$TRAVIS_COMMIT/" znx
 
 
 # -- Populate appdir.
