@@ -255,9 +255,8 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
-		rm *.zs-old &&
-			printf "Sucessfully cleaned \e[32m$IMAGE\e[0m.\n" ||
-			error "Nothing to clean."
+		rm -f *.zs-old &&
+			printf "Sucessfully cleaned \e[32m$IMAGE\e[0m.\n"
 
 	;;
 
