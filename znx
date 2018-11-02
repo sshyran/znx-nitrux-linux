@@ -67,10 +67,8 @@ error () {
 _mount () {
 	for d in $DEVICE*; do
 
-		blkid $d | grep -q ZNX_DATA && {
-			mount $d $ZNX_DIR ||
-				error "Unable to mount $d! Exiting now."
-		}
+		blkid $d | grep -q ZNX_DATA &&
+			mount $d $ZNX_DIR
 
 	done
 
