@@ -227,13 +227,13 @@ case $COMMAND in
 
 	;;
 
-	rollback)
+	revert)
 
 		[ $# -ne 3 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Performing rollback on \e[32m$IMAGE\e[0m.\n"
+		printf "Reverting update on \e[32m$IMAGE\e[0m.\n"
 
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
