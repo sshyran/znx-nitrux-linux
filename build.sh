@@ -16,8 +16,7 @@ chmod a+x znx
 
 # -- Write the commit that generated this build.
 
-sed -i "s/@TRAVIS_COMMIT@/$TRAVIS_COMMIT/" znx
-echo COMMIT: $TRAVIS_COMMIT
+sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:8}/" znx
 
 
 # -- Populate appdir.
@@ -77,7 +76,6 @@ chmod a+x appdir/AppRun
 grub-mkimage \
 	-C xz \
 	-O x86_64-efi \
-	-p /boot/grub \
 	-o appdir/bootx64.efi \
 	boot linux search normal configfile \
 	part_gpt btrfs fat iso9660 loopback \
