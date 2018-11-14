@@ -18,10 +18,10 @@ In the image below, you can see `znx`'s boot menu.
 To try it out, just grab an USB stick or and external drive and run:
 
 ```
-# ./znx init /dev/sdb
-# ./znx deploy /dev/sdb nitrux/continuous http://88.198.66.58:8000/nitrux_release_testing.iso.zsync
+# ./znx init /dev/sdX
+# ./znx deploy /dev/sdX nitrux/stable http://repo.nxos.org:8000/nitrux_release_stable
 ```
 
-Be sure to replace `/dev/sdb` with the actual device name of your device.
+Be sure to replace `/dev/sdX` with the actual device name of your device.
 Those commands will, first, initialize the device, and, second, deploy the nitrux/testing image 
 on the device. Reboot.
