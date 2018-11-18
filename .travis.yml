@@ -1,7 +1,7 @@
 sudo: required
 
 script:
-  - sudo sh build.sh
+  - sudo bash build.sh
 
 after_success:
   - wget -q https://github.com/probonopd/uploadtool/raw/master/upload.sh

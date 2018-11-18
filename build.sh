@@ -16,7 +16,7 @@ chmod a+x znx
 
 # -- Write the commit that generated this build.
 
-sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:8}/" znx
+sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" znx
 
 
 # -- Populate appdir.
