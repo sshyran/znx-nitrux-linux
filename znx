@@ -1,15 +1,35 @@
 #! /bin/sh
 
+# -- Exit on errors.
+
 set -e
+
+
+# -- Argument handling.
 
 COMMAND=$1
 DEVICE=$2
 IMAGE=$3
 URL=$4
 
+
+# -- Default file names.
+
+ACTIVE_IMAGE=IMAGE.0
+BACKUP_IMAGE=IMAGE.1
+
+
+# -- Commit that generated this build.
+
 VERSION=@TRAVIS_COMMIT@
 
+
+# -- Prepare the mountpoint.
+
 ZNX_DIR=$(mktemp -d)
+
+
+# -- Help text.
 
 HELP=\
 "Usage: znx [option] <command>
@@ -106,11 +126,6 @@ trap clean EXIT HUP INT TERM
 	printf $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
 		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 }
-
-
-# -- Prepare the temporary directory.
-
-mkdir -p $ZNX_DIR
 
 
 # -- Run the specified command.
@@ -214,12 +229,12 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
-		UPDATE_URL=$(printf $(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null))
+		UPDATE_URL=$(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null)
 
 		[ ${#UPDATE_URL} -eq 0 ] &&
 			error "Unable to gather update information from $IMAGE. Aborting update."
 
-		zsync ${UPDATE_URL/zsync|} &&
+		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE &&
 			printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
 			error "Failed to update \e[32m$IMAGE\e[0m."
 
@@ -236,7 +251,7 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
-		mv -f *.zs-old *.iso &&
+		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE &&
 			printf "Sucessfully performed rollback on \e[32m$IMAGE\e[0m.\n" ||
 			error "Couldn't perform a rollback on \e[32m$IMAGE\e[0m."
 
@@ -253,7 +268,7 @@ case $COMMAND in
 		cd $ZNX_DIR/boot_images/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
-		rm -f *.zs-old &&
+		rm -f $BACKUP_IMAGE &&
 			printf "Sucessfully cleaned \e[32m$IMAGE\e[0m.\n"
 
 	;;
