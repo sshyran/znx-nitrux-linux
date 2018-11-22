@@ -204,8 +204,8 @@ case $COMMAND in
 			cd $ZNX_DIR/boot_images/$IMAGE
 
 			printf $URL | grep -q 'zsync$' &&
-				zsync $URL ||
-				axel $URL > /dev/null
+				zsync -o $ACTIVE_IMAGE $URL ||
+				axel -q -o $ACTIVE_IMAGE $URL
 
 		) || {
 
@@ -237,6 +237,8 @@ case $COMMAND in
 		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE &&
 			printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
 			error "Failed to update \e[32m$IMAGE\e[0m."
+
+		
 
 	;;
 
