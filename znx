@@ -216,7 +216,7 @@ case $COMMAND in
 
 		UPDATE_URL=$(printf $(dd if=$(printf *.iso) bs=1 skip=33651 count=512 2> /dev/null))
 
-		[ ${#UPDATE_URLA} -eq 0 ] &&
+		[ ${#UPDATE_URL} -eq 0 ] &&
 			error "Unable to gather update information from $IMAGE. Aborting update."
 
 		zsync ${UPDATE_URL/zsync|} &&
