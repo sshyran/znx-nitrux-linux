@@ -1,7 +1,7 @@
 sudo: required
 
 script:
-  - sudo docker run --rm -v $(pwd)/:/build/ -w /build/ ubuntu:xenial /bin/sh -c "TRAVIS_COMMIT=$TRAVIS_COMMIT build.sh"
+  - sudo docker run --rm -v $(pwd)/:/build/ -w /build/ ubuntu:xenial /bin/sh build.sh $TRAVIS_COMMIT
 
 after_success:
   - wget -q https://github.com/probonopd/uploadtool/raw/master/upload.sh
