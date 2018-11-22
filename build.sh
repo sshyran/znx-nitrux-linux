@@ -6,12 +6,22 @@ apt-get -qq -y update
 apt-get -qq -y install wget patchelf file libcairo2
 apt-get -qq -y install busybox-static axel gdisk zsync util-linux btrfs-tools dosfstools grub-common grub2-common grub-efi-amd64-bin
 
+printf "
+
+###
+$(apt-cache policy gdisk)
+
+###
+$(ldd $(which sgdisk))
+
+"
+
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
 
 chmod +x appimagetool
 chmod +x copier
-chmod a+x znx
+chmod +x znx
 
 
 # -- Write the commit that generated this build.
