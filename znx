@@ -16,7 +16,7 @@ URL=$4
 # -- Default file names.
 
 ACTIVE_IMAGE=IMAGE.0
-BACKUP_IMAGE=IMAGE.1
+BACKUP_IMAGE=IMAGE.0.zs-old
 
 
 # -- Commit that generated this build.
