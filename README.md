@@ -15,7 +15,7 @@ In the image below, you can see `znx`'s boot menu.
 ![](https://i.imgur.com/YcBBARM.png)
 
 
-To try it out, [download the AppImage](https://github.com/Nitrux/znx/releases), grab a USB stick or and external drive and run with UID 0 (root):
+To try it out, [download the AppImage](https://github.com/Nitrux/znx/releases), grab a USB stick or and external drive and run as UID 0 (root):
 
 ```
 # ./znx init /dev/sdX
