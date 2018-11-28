@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/Nitrux/znx.svg?branch=master)](https://travis-ci.org/Nitrux/znx)
 
+![](https://raw.githubusercontent.com/Nitrux/znx/master/appdir/znx.png)
+
 `znx` allows the user to perform the following:
 
 - Make parallel deployments of Linux distributions.
