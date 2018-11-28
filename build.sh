@@ -37,9 +37,6 @@ Categories=Utility;
 OnlyShowIn=
 ' > appdir/znx.desktop
 
-touch appdir/znx.png
-
-
 
 # -- Create a wrapper script.
 
