@@ -307,7 +307,7 @@ case $COMMAND in
 
 		_mount
 		cd $ZNX_DIR/$IMG_DIR
-		ls --color=never -1 -d */*
+		ls --color=never -1 -d */*
 
 	;;
 
