@@ -11,12 +11,12 @@ wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
 
 chmod +x appimagetool
 chmod +x copier
-chmod +x znx
+chmod +x appdir/znx
 
 
 # -- Write the commit that generated this build.
 
-sed -i "s/@TRAVIS_COMMIT@/${1:0:7}/" znx
+sed -i "s/@TRAVIS_COMMIT@/${1:0:7}/" appdir/znx
 
 
 # -- Populate appdir.
