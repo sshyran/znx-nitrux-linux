@@ -32,7 +32,6 @@ Name=znx
 Exec=znx
 Icon=znx
 Comment="Operating system manager."
-Terminal=true
 Categories=Utility;
 OnlyShowIn=
 ' > appdir/znx.desktop
