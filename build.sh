@@ -22,8 +22,6 @@ sed -i "s/@TRAVIS_COMMIT@/${1:0:7}/" znx
 # -- Populate appdir.
 
 mkdir -p appdir/bin
-cp znx appdir
-cp grub.cfg appdir
 
 printf \
 '[Desktop Entry]
