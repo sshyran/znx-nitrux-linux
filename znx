@@ -218,7 +218,7 @@ case $COMMAND in
 
 		) || {
 
-			rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE
+			find $ZNX_DIR/$IMG_DIR/ -type d -mindepth 1 -empty -delete
 			error "Failed to deploy $IMAGE."
 
 		}
