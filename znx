@@ -19,6 +19,11 @@ ACTIVE_IMAGE=IMAGE.0
 BACKUP_IMAGE=IMAGE.0.zs-old
 
 
+# -- Images location.
+
+IMG_DIR=/boot_images
+
+
 # -- Commit that generated this build.
 
 VERSION=@TRAVIS_COMMIT@
@@ -82,6 +87,10 @@ Examples:
 error () {
 	printf "znx: \e[31mError:\e[0m $@\n" >& 2
 	exit 1
+}
+
+_print () {
+	printf "znx: $@\n"
 }
 
 _mount () {
@@ -177,12 +186,12 @@ case $COMMAND in
 				mkdir -p \
 					$ZNX_DIR/data/etc \
 					$ZNX_DIR/data/home \
-					$ZNX_DIR/boot_images
+					$ZNX_DIR/$IMG_DIR
 			}
 
 		done
 
-		printf "Operation successful. Device is ready.\n"
+		_print "Operation successful. Device is ready."
 
 	;;
 
@@ -192,16 +201,16 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Deploying \e[32m$IMAGE\e[0m.\n"
+		_print "Deploying $IMAGE."
 
-		[ -d $ZNX_DIR/boot_images/$IMAGE ] &&
+		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] &&
 			error "Deployment aborted: $IMAGE is already deployed."
 
-		mkdir -p $ZNX_DIR/boot_images/$IMAGE
+		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		cp $URL $ZNX_DIR/boot_images/$IMAGE || (
+		cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE || (
 
-			cd $ZNX_DIR/boot_images/$IMAGE
+			cd $ZNX_DIR/$IMG_DIR/$IMAGE
 
 			printf $URL | grep -q 'zsync$' &&
 				zsync -o $ACTIVE_IMAGE $URL ||
@@ -209,12 +218,12 @@ case $COMMAND in
 
 		) || {
 
-			rm -rf $ZNX_DIR/boot_images/$IMAGE
-			error "Failed to deploy \e[32m$IMAGE\e[0m."
+			rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE
+			error "Failed to deploy $IMAGE."
 
 		}
 
-		printf "Successfully deployed \e[32m$IMAGE\e[0m.\n"
+		_print "Successfully deployed $IMAGE."
 
 	;;
 
@@ -224,9 +233,9 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Updating \e[32m$IMAGE\e[0m.\n"
+		_print "Updating $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE ||
+		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
@@ -235,8 +244,8 @@ case $COMMAND in
 			error "Unable to gather update information from $IMAGE. Aborting update."
 
 		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE &&
-			printf "Successfully updated \e[32m$IMAGE\e[0m.\n" ||
-			error "Failed to update \e[32m$IMAGE\e[0m."
+			_print "Successfully updated $IMAGE." ||
+			error "Failed to update $IMAGE."
 
 		
 
@@ -248,14 +257,14 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Reverting update on \e[32m$IMAGE\e[0m.\n"
+		print "Reverting update on $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE ||
-			error "\e[32m$IMAGE\e[0m is not deployed."
+		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+			error "$IMAGE is not deployed."
 
 		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE &&
-			printf "Sucessfully performed rollback on \e[32m$IMAGE\e[0m.\n" ||
-			error "Couldn't perform a rollback on \e[32m$IMAGE\e[0m."
+			_print "Sucessfully performed rollback on $IMAGE." ||
+			error "Couldn't perform a rollback on $IMAGE."
 
 	;;
 
@@ -265,13 +274,13 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Cleaning \e[32m$IMAGE\e[0m.\n"
+		_print "Cleaning $IMAGE."
 
-		cd $ZNX_DIR/boot_images/$IMAGE ||
-			error "\e[32m$IMAGE\e[0m is not deployed."
+		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+			error "$IMAGE is not deployed."
 
 		rm -f $BACKUP_IMAGE &&
-			printf "Sucessfully cleaned \e[32m$IMAGE\e[0m.\n"
+			_print "Sucessfully cleaned $IMAGE."
 
 	;;
 
@@ -281,13 +290,13 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		printf "Removing \e[32m$IMAGE\e[0m.\n"
+		_print "Removing $IMAGE."
 
-		[ -d $ZNX_DIR/boot_images/$IMAGE ] ||
-			error "\e[32m$IMAGE\e[0m is not deployed."
+		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] ||
+			error "$IMAGE is not deployed."
 
-		rm -rf $ZNX_DIR/boot_images/$IMAGE &&
-			printf "Successfully removed \e[32m$IMAGE\e[0m.\n"
+		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE &&
+			_print "Successfully removed $IMAGE."
 
 	;;
 
@@ -297,13 +306,8 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-
-		cd $ZNX_DIR/boot_images
-
-		for x in */*; do
-			[ -d $x ] &&
-				printf "\e[36m$x\e[0m\n"
-		done
+		cd $ZNX_DIR/$IMG_DIR
+		ls --color=never -1 -d */*
 
 	;;
 
