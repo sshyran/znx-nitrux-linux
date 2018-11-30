@@ -102,7 +102,7 @@ _mount () {
 	done
 
 	mountpoint -q $ZNX_DIR ||
-		error "Device isn't being managed by znx. You must initialize it first."
+		error "Device has not been initialized."
 
 }
 
