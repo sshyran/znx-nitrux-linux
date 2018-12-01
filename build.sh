@@ -48,12 +48,6 @@ exec $APPDIR/znx $@
 chmod a+x appdir/AppRun
 
 
-# -- Install busybox.
-
-./copier busybox appdir
-/bin/busybox --install -s appdir/bin
-
-
 # -- Copy binaries and its dependencies to appdir.
 
 ./copier axel appdir

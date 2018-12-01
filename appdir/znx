@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 # -- Exit on errors.
 
@@ -208,7 +208,7 @@ case $COMMAND in
 
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE || (
+		cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE || (
 
 			cd $ZNX_DIR/$IMG_DIR/$IMAGE
 
