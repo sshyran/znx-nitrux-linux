@@ -203,9 +203,6 @@ case $COMMAND in
 		_mount
 		_print "Deploying $IMAGE."
 
-		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] &&
-			error "Deployment aborted: $IMAGE is already deployed."
-
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
 		cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE || (
