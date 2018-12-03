@@ -202,18 +202,21 @@ case $COMMAND in
 
 		_mount
 		_print "Deploying $IMAGE."
-
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE || (
+		[ -f $URL ] && {
+
+			cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
+
+		} || {
 
 			cd $ZNX_DIR/$IMG_DIR/$IMAGE
 
 			printf $URL | grep -q 'zsync$' &&
 				zsync -o $ACTIVE_IMAGE $URL ||
-				axel -q -o $ACTIVE_IMAGE $URL
+				axel -o $ACTIVE_IMAGE $URL
 
-		) || {
+		} || {
 
 			find $ZNX_DIR/$IMG_DIR/ -mindepth 1 -type d -empty -delete
 			error "Failed to deploy $IMAGE."
