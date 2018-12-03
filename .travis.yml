@@ -5,6 +5,7 @@ script:
 
 after_success:
   - wget -q https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - export UPLOADTOOL_SUFFIX=$(printf $TRAVIS_BRANCH | sed 's/master/stable/')
   - bash upload.sh out/*
 
 branches:
