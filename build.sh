@@ -1,5 +1,11 @@
 #! /bin/sh
 
+# -- Variables passed by the docker command.
+
+TRAVIS_COMMIT=$1
+TRAVIS_BRANCH=$2
+
+
 # -- Install dependencies.
 
 apt-get -qq -y update > /dev/null
@@ -16,7 +22,7 @@ chmod +x appdir/znx
 
 # -- Write the commit that generated this build.
 
-sed -i "s/@TRAVIS_COMMIT@/${1:0:7}/" appdir/znx
+sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 
 # -- Populate appdir.
@@ -97,4 +103,4 @@ wget -q https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimag
 chmod a+x appimage-wrapper
 
 mkdir out
-ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx
+ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$(printf $TRAVIS_BRANCH | sed 's/master/stable/')
