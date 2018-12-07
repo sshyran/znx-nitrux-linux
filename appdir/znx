@@ -153,7 +153,7 @@ case $COMMAND in
 
 		PREFIX=$(dirname $(readlink -f $0))
 
-		printf "Wiping $DEVICE. Please wait.\n"
+		_print "Wiping $DEVICE. Please wait."
 		wipefs -af $DEVICE
 		sgdisk -Z \
 			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
@@ -206,9 +206,11 @@ case $COMMAND in
 		_print "Deploying $IMAGE."
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		set -x
+		(
 
-		{
+			# -- Abort the deployment on user interrupts.
+
+			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}; error 'Failed to deploy $IMAGE.'" INT
 
 			[ -f $URL ] && {
 
@@ -216,22 +218,16 @@ case $COMMAND in
 
 			} || {
 
-				printf $URL | grep -q '^http://.*zsync$' &&
+				printf $URL | grep -q '^.*zsync$' &&
 					zsync -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
-					axel -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
+					axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
+					error "Failed to deploy $IMAGE."
 
 			}
 
-		} || {
-
-			find $ZNX_DIR/$IMG_DIR/ -mindepth 1 -type d -empty -delete
-			error "Failed to deploy $IMAGE."
-
-		}
+		)
 
 		_print "Successfully deployed $IMAGE."
-
-		set +x
 
 	;;
 
@@ -251,11 +247,10 @@ case $COMMAND in
 		[ ${#UPDATE_URL} -eq 0 ] &&
 			error "Unable to gather update information from $IMAGE. Aborting update."
 
-		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE &&
-			_print "Successfully updated $IMAGE." ||
+		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
 			error "Failed to update $IMAGE."
 
-		
+		_print "Successfully updated $IMAGE."
 
 	;;
 
@@ -265,14 +260,15 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		print "Reverting update on $IMAGE."
+		_print "Reverting update on $IMAGE."
 
 		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE &&
-			_print "Sucessfully performed rollback on $IMAGE." ||
+		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
 			error "Couldn't perform a rollback on $IMAGE."
+
+		_print "Sucessfully performed rollback on $IMAGE."
 
 	;;
 
@@ -287,8 +283,8 @@ case $COMMAND in
 		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		rm -f $BACKUP_IMAGE &&
-			_print "Sucessfully cleaned $IMAGE."
+		rm -f $BACKUP_IMAGE
+		_print "Sucessfully cleaned $IMAGE."
 
 	;;
 
@@ -303,8 +299,8 @@ case $COMMAND in
 		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] ||
 			error "$IMAGE is not deployed."
 
-		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE &&
-			_print "Successfully removed $IMAGE."
+		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE
+		_print "Successfully removed $IMAGE."
 
 	;;
 
