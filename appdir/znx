@@ -310,8 +310,11 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		cd $ZNX_DIR/$IMG_DIR
-		ls --color=never -1 -d */*
+
+		(
+			cd $ZNX_DIR/$IMG_DIR
+			ls --color=never -1 -d */*
+		)
 
 	;;
 
