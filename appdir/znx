@@ -107,11 +107,13 @@ _mount () {
 }
 
 clean () {
-	cd /
+
 	while mountpoint -q $ZNX_DIR; do
 		umount -f $ZNX_DIR
 	done
+
 	rm -rf $ZNX_DIR
+
 }
 
 
@@ -204,6 +206,8 @@ case $COMMAND in
 		_print "Deploying $IMAGE."
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
+		set -x
+
 		{
 
 			[ -f $URL ] && {
@@ -212,11 +216,9 @@ case $COMMAND in
 
 			} || {
 
-				cd $ZNX_DIR/$IMG_DIR/$IMAGE
-
 				printf $URL | grep -q '^http://.*zsync$' &&
-					zsync -o $ACTIVE_IMAGE $URL ||
-					axel -o $ACTIVE_IMAGE $URL
+					zsync -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
+					axel -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
 
 			}
 
@@ -228,6 +230,8 @@ case $COMMAND in
 		}
 
 		_print "Successfully deployed $IMAGE."
+
+		set +x
 
 	;;
 
