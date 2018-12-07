@@ -204,19 +204,21 @@ case $COMMAND in
 		_print "Deploying $IMAGE."
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		set -x
+		{
 
-		[ -f $URL ] && {
+			[ -f $URL ] && {
 
-			cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
+				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
 
-		} || {
+			} || {
 
-			cd $ZNX_DIR/$IMG_DIR/$IMAGE
+				cd $ZNX_DIR/$IMG_DIR/$IMAGE
 
-			printf $URL | grep -q '^http://.*zsync$' &&
-				zsync -o $ACTIVE_IMAGE $URL ||
-				axel -o $ACTIVE_IMAGE $URL
+				printf $URL | grep -q '^http://.*zsync$' &&
+					zsync -o $ACTIVE_IMAGE $URL ||
+					axel -o $ACTIVE_IMAGE $URL
+
+			}
 
 		} || {
 
@@ -226,8 +228,6 @@ case $COMMAND in
 		}
 
 		_print "Successfully deployed $IMAGE."
-
-		set +x
 
 	;;
 
