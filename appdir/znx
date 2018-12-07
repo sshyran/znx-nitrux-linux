@@ -108,6 +108,8 @@ _mount () {
 
 clean () {
 
+	cd /
+
 	while mountpoint -q $ZNX_DIR; do
 		umount -f $ZNX_DIR
 	done
@@ -311,10 +313,8 @@ case $COMMAND in
 
 		_mount
 
-		(
-			cd $ZNX_DIR/$IMG_DIR
-			ls --color=never -1 -d */*
-		)
+		cd $ZNX_DIR/$IMG_DIR
+		ls --color=never -1 -d */*
 
 	;;
 
