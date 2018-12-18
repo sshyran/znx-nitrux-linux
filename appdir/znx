@@ -107,11 +107,15 @@ _mount () {
 }
 
 clean () {
+
 	cd /
+
 	while mountpoint -q $ZNX_DIR; do
 		umount -f $ZNX_DIR
 	done
+
 	rm -rf $ZNX_DIR
+
 }
 
 
@@ -132,7 +136,7 @@ trap clean EXIT HUP INT TERM
 	error "$DEVICE is not a block device"
 
 [ ${#IMAGE} -gt 0 ] && {
-	printf $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
+	printf %s $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
 		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 }
 
@@ -151,7 +155,7 @@ case $COMMAND in
 
 		PREFIX=$(dirname $(readlink -f $0))
 
-		printf "Wiping $DEVICE. Please wait.\n"
+		_print "Wiping $DEVICE. Please wait."
 		wipefs -af $DEVICE
 		sgdisk -Z \
 			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
@@ -204,24 +208,26 @@ case $COMMAND in
 		_print "Deploying $IMAGE."
 		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
 
-		[ -f $URL ] && {
+		(
 
-			cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
+			# -- Abort the deployment on user interrupts.
 
-		} || {
+			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}; error 'Failed to deploy $IMAGE.'" INT
 
-			cd $ZNX_DIR/$IMG_DIR/$IMAGE
+			[ -f $URL ] && {
 
-			printf $URL | grep -q 'zsync$' &&
-				zsync -o $ACTIVE_IMAGE $URL ||
-				axel -o $ACTIVE_IMAGE $URL
+				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
 
-		} || {
+			} || {
 
-			find $ZNX_DIR/$IMG_DIR/ -mindepth 1 -type d -empty -delete
-			error "Failed to deploy $IMAGE."
+				printf %s $URL | grep -q '^.*zsync$' &&
+					zsync -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
+					axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
+					error "Failed to deploy $IMAGE."
 
-		}
+			}
+
+		)
 
 		_print "Successfully deployed $IMAGE."
 
@@ -243,11 +249,10 @@ case $COMMAND in
 		[ ${#UPDATE_URL} -eq 0 ] &&
 			error "Unable to gather update information from $IMAGE. Aborting update."
 
-		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE &&
-			_print "Successfully updated $IMAGE." ||
+		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
 			error "Failed to update $IMAGE."
 
-		
+		_print "Successfully updated $IMAGE."
 
 	;;
 
@@ -257,14 +262,15 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
-		print "Reverting update on $IMAGE."
+		_print "Reverting update on $IMAGE."
 
 		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE &&
-			_print "Sucessfully performed rollback on $IMAGE." ||
+		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
 			error "Couldn't perform a rollback on $IMAGE."
+
+		_print "Sucessfully performed rollback on $IMAGE."
 
 	;;
 
@@ -279,8 +285,8 @@ case $COMMAND in
 		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
 			error "$IMAGE is not deployed."
 
-		rm -f $BACKUP_IMAGE &&
-			_print "Sucessfully cleaned $IMAGE."
+		rm -f $BACKUP_IMAGE
+		_print "Sucessfully cleaned $IMAGE."
 
 	;;
 
@@ -295,8 +301,8 @@ case $COMMAND in
 		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] ||
 			error "$IMAGE is not deployed."
 
-		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE &&
-			_print "Successfully removed $IMAGE."
+		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE
+		_print "Successfully removed $IMAGE."
 
 	;;
 
@@ -306,6 +312,7 @@ case $COMMAND in
 			error "Bad command: wrong number of arguments."
 
 		_mount
+
 		cd $ZNX_DIR/$IMG_DIR
 		ls --color=never -1 -d */*
 
