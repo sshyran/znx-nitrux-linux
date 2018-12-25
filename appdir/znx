@@ -85,7 +85,7 @@ Examples:
 # -- Helper functions.
 
 error () {
-	printf "znx: \e[31mError:\e[0m $@\n" >& 2
+	printf %b "znx: \e[31mError:\e[0m $@\n" >& 2
 	exit 1
 }
 
