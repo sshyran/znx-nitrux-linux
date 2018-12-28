@@ -75,3 +75,10 @@ chmod a+x appimage-wrapper
 
 mkdir out
 ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$(printf $TRAVIS_BRANCH | sed 's/master/stable/')
+
+
+# -- Embed update information in the AppImage.
+
+UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-development/znx_$TRAVIS_BRANCH"
+
+printf "$UPDATE_URL" | dd of=".AppImage" bs=1 seek=33651 count=512 conv=notrunc 2> /dev/null
