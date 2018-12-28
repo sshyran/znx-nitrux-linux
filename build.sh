@@ -25,35 +25,6 @@ chmod +x appdir/znx
 sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 
-# -- Populate appdir.
-
-mkdir -p appdir/bin
-
-printf \
-'[Desktop Entry]
-Type=Application
-Name=znx
-Exec=znx
-Icon=znx
-Comment="Operating system manager."
-Categories=Utility;
-OnlyShowIn=
-' > appdir/znx.desktop
-
-
-# -- Create a wrapper script.
-
-printf \
-'#! /bin/sh
-
-export LD_LIBRARY_PATH=$APPDIR/usr/lib:$LD_LIBRARY_PATH
-export PATH=$PATH:$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$APPDIR/usr/sbin
-exec $APPDIR/znx $@
-' > appdir/AppRun
-
-chmod a+x appdir/AppRun
-
-
 # -- Copy binaries and its dependencies to appdir.
 
 ./copier axel appdir
