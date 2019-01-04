@@ -156,9 +156,10 @@ case $COMMAND in
 		PREFIX=$(dirname $(readlink -f $0))
 
 		_print "Wiping $DEVICE. Please wait."
+
 		wipefs -af $DEVICE
 		sgdisk -Z \
-			-n 1::132M -t 1:EF00 -c 1:ZNX_BOOT \
+			-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
 			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
 		for d in $DEVICE*; do
@@ -166,7 +167,9 @@ case $COMMAND in
 			# -- Prepare the boot partition.
 
 			blkid $d | grep -q ZNX_BOOT && {
-				mkfs.vfat $d
+
+				mkfs.vfat -F 32 $d
+
 				mount $d $ZNX_DIR ||
 					error "Unable to mount $d! Device initialization failed."
 
@@ -183,7 +186,9 @@ case $COMMAND in
 			# -- Prepare the data partition.
 
 			blkid $d | grep -q ZNX_DATA && {
+
 				mkfs.btrfs -f $d
+
 				mount $d $ZNX_DIR ||
 					error "Unable to mount $d! Device initialization failed."
 
@@ -191,6 +196,7 @@ case $COMMAND in
 					$ZNX_DIR/data/etc \
 					$ZNX_DIR/data/home \
 					$ZNX_DIR/$IMG_DIR
+
 			}
 
 		done
