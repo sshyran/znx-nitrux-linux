@@ -43,7 +43,7 @@ grub-mkimage \
 	-O x86_64-efi \
 	-o appdir/bootx64.efi \
 	boot linux search normal configfile \
-	part_gpt btrfs fat iso9660 loopback \
+	part_gpt btrfs ext2 fat iso9660 loopback \
 	test keystatus gfxmenu regexp probe \
 	efi_gop efi_uga all_video gfxterm font \
 	echo read ls cat png jpeg halt reboot
