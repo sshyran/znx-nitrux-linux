@@ -12,11 +12,13 @@ In the image below, you can see `znx`'s boot menu.
 
 ![](https://i.imgur.com/YcBBARM.png)
 
-To try it out, [download the AppImage](https://github.com/Nitrux/znx/releases), give execution permissions to the AppImage and run as root:
+To try it out, [download the AppImage](https://github.com/Nitrux/znx/releases), give execution permissions
+to the AppImage and run as root:
 
 ```
 ./znx init /dev/sdX
-./znx deploy /dev/sdX nitrux/stable http://repo.nxos.org:8000/nitrux_release_stable
+./znx deploy /dev/sdX nitrux/stable iso http://repo.nxos.org:8000/nitrux_release_stable
 ```
 
-Be sure to replace `/dev/sdX` with the actual device name of your device. These commands will initialize the storage device and deploy the `nitrux/stable` image on the target computer.
+Be sure to replace `/dev/sdX` with the name of your device. These commands will initialize
+the storage device and deploy the `nitrux/stable` image on the device.
