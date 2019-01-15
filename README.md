@@ -17,7 +17,7 @@ to the AppImage and run as root:
 
 ```
 ./znx init /dev/sdX
-./znx deploy /dev/sdX nitrux/stable iso http://repo.nxos.org:8000/nitrux_release_stable
+./znx deploy /dev/sdX nitrux/stable http://repo.nxos.org:8000/nitrux_release_stable
 ```
 
 Be sure to replace `/dev/sdX` with the name of your device. These commands will initialize

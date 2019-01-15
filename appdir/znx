@@ -10,8 +10,8 @@ set -e
 COMMAND=$1
 DEVICE=$2
 IMAGE=$3
-FTYPE=$4
-URL=$5
+URL=$4
+FTYPE=$5
 
 
 # -- Default file names.
@@ -38,22 +38,22 @@ ZNX_DIR=$(mktemp -d)
 # -- Help text.
 
 HELP=\
-"Usage: znx [option] <command>
+"Usage: znx <option | command>
 
 Options:
 
-  -v, --version                                       Print the commit hash that generated this build.
-  -h, --help                                          Print this help.
+  -v, --version                          Print the commit hash that generated this binary.
+  -h, --help                             Print this help.
 
 Commands:
 
-  init <device>                                       Initialize the storage device.
-  deploy <device> <image> <file type> <URL | path>    Deploy an image on a storage device. The file type can be 'iso' or 'zsync'
-  update <device> <image>                             Update the specified image.
-  revert <device> <image>                             Revert to the previous version of the image.
-  clean <device> <image>                              Remove the backup that is created during an update.
-  remove <device> <image>                             Remove the specified image.
-  list <device>                                       List the deployed images.
+  init <device>                           Initialize the storage device.
+  deploy <device> <image> <URL | path>    Deploy an image on a storage device.
+  update <device> <image>                 Update the specified image.
+  revert <device> <image>                 Revert to the previous version of the image.
+  clean <device> <image>                  Remove the backup that is created during an update.
+  remove <device> <image>                 Remove the specified image.
+  list <device>                           List the deployed images.
 
 Examples:
 
@@ -61,9 +61,8 @@ Examples:
   - znx init /dev/sdX
 
   Deploy an image:
-  - znx deploy /dev/sdX vendor/release zsync http://foo.bar/image.iso.zsync
   - znx deploy /dev/sdX vendor/release iso http://foo.bar/image.iso
-  - znx deploy /dev/sdX vendor/release iso image.iso
+  - znx deploy /dev/sdX vendor/release iso ~/Downloads/image.iso
 
   Update an image:
   - znx update /dev/sdX vendor/release
@@ -71,7 +70,7 @@ Examples:
   Revert an update (downgrade):
   - znx revert /dev/sdX vendor/release
 
-  Delete the previous version of an image (to save some space):
+  Delete the backup of an image (to save some space):
   - znx clean /dev/sdX vendor/release
 
   Remove an image:
@@ -91,10 +90,11 @@ error () {
 }
 
 _print () {
-	printf "znx: $@\n"
+	printf %b "znx: $@\n"
 }
 
 _mount () {
+
 	for d in $DEVICE*; do
 
 		blkid $d | grep -q ZNX_DATA &&
@@ -138,7 +138,7 @@ trap clean EXIT HUP INT TERM
 
 [ ${#IMAGE} -gt 0 ] && {
 	printf %s $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
-		error "The image name must match the extended regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
+		error "The image name must match the regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
 }
 
 
@@ -208,7 +208,7 @@ case $COMMAND in
 
 	deploy)
 
-		[ $# -ne 5 ] &&
+		[ $# -ne 4 -o $# -ne 5 ] &&
 			error "Bad command: wrong number of arguments."
 
 		_mount
@@ -217,37 +217,22 @@ case $COMMAND in
 
 		(
 
-			# -- Delete partial downloads if the deployment is interrupted.
+			# -- Delete leftovers if the deployment is interrupted.
 
 			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}; error 'Failed to deploy $IMAGE.'" INT
 
-				[ -f $URL ] &&
-					cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE ||
+			[ -f $URL ] && {
 
-			case $FSTYPE in
+				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
 
-				iso)
+			} || {
 
-					axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
+				axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
+					error "Failed to deploy $IMAGE."
 
-				;;
+			}
 
-				zsync)
-
-					zsync -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
-
-				;;
-
-
-				*)
-
-					error "Unknown file type '$FSTYPE'."
-
-				;;
-
-			esac
-
-		) || error "Failed to deploy $IMAGE."
+		)
 
 		_print "Successfully deployed $IMAGE."
 
@@ -334,17 +319,35 @@ case $COMMAND in
 		_mount
 
 		cd $ZNX_DIR/$IMG_DIR
-		ls --color=never -1 -d */*
+		ls -1 -d */*
 
 	;;
 
-	-h|--help )
+	stats)
+
+		[ $# -ne 2 ] &&
+			error "Bad command: wrong number of arguments."
+
+		_mount
+
+		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+			error "$IMAGE is not deployed."
+
+		printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
+		printf "Last update: %$(date -u -r $ACTIVE_IMAGE).\n"
+
+		[ -f $BACKUP_IMAGE ] &&
+			printf "Backup size: $(ls -sh $BACKUP_IMAGE | cut -d ' ' -f 1).\n"
+
+	;;
+
+	-h|--help)
 
 		printf "$HELP"
 
 	;;
 
-	-v|--version )
+	-v|--version)
 
 		printf "$VERSION\n"
 
