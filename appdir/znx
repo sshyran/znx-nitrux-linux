@@ -186,19 +186,9 @@ case $COMMAND in
 
 			# -- Prepare the data partition.
 
-			blkid $d | grep -q ZNX_DATA && {
-
+			blkid $d | grep -q ZNX_DATA &&
 				mkfs.btrfs -f $d
-
-				mount $d $ZNX_DIR ||
-					error "Unable to mount $d! Device initialization failed."
-
-				mkdir -p \
-					$ZNX_DIR/data/etc \
-					$ZNX_DIR/data/home \
-					$ZNX_DIR/$IMG_DIR
-
-			}
+				error "Unable to mount $d! Device initialization failed."
 
 		done
 
@@ -213,26 +203,23 @@ case $COMMAND in
 
 		_mount
 		_print "Deploying $IMAGE."
-		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE
+
+		mkdir -p \
+			$ZNX_DIR/$IMG_DIR/$IMAGE \
+			$ZNX_DIR/$IMG_DIR/$IMAGE/data/etc \
+			$ZNX_DIR/$IMG_DIR/$IMAGE/data/home
 
 		(
 
 			# -- Delete leftovers if the deployment is interrupted.
 
-			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}; error 'Failed to deploy $IMAGE.'" INT
+			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}" INT
 
-			[ -f $URL ] && {
+			[ -f $URL ] &&
+				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE ||
+				axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
 
-				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE
-
-			} || {
-
-				axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL ||
-					error "Failed to deploy $IMAGE."
-
-			}
-
-		)
+		) || error "Failed to deploy $IMAGE."
 
 		_print "Successfully deployed $IMAGE."
 
@@ -341,13 +328,13 @@ case $COMMAND in
 
 	;;
 
-	-h|--help)
+	-h|--help|help)
 
 		printf "$HELP"
 
 	;;
 
-	-v|--version)
+	-v|--version|version)
 
 		printf "$VERSION\n"
 
