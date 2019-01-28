@@ -204,10 +204,7 @@ case $COMMAND in
 		_mount
 		_print "Deploying $IMAGE."
 
-		mkdir -p \
-			$ZNX_DIR/$IMG_DIR/$IMAGE \
-			$ZNX_DIR/$IMG_DIR/$IMAGE/data/etc \
-			$ZNX_DIR/$IMG_DIR/$IMAGE/data/home
+		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE/DATA
 
 		(
 
