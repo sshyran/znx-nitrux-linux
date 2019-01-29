@@ -61,8 +61,8 @@ Examples:
   - znx init /dev/sdX
 
   Deploy an image:
-  - znx deploy /dev/sdX vendor/release iso http://foo.bar/image.iso
-  - znx deploy /dev/sdX vendor/release iso ~/Downloads/image.iso
+  - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
+  - znx deploy /dev/sdX vendor/release /path/to/image.iso
 
   Update an image:
   - znx update /dev/sdX vendor/release
