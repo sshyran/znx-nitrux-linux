@@ -10,7 +10,7 @@ For more information about how `znx` works, please refer to the [documentation](
 
 In the image below, you can see `znx`'s boot menu.
 
-![](https://i.imgur.com/YcBBARM.png)
+![](https://cdn-images-1.medium.com/max/1200/1*b4eeOQ8ZR30RUtPv5sJ9NA.png)
 
 To try it out, [download the AppImage](https://github.com/Nitrux/znx/releases), give execution permissions
 to the AppImage and run as root:
