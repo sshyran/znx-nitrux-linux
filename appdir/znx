@@ -53,6 +53,7 @@ Commands:
   revert <device> <image>                 Revert to the previous version of the image.
   clean <device> <image>                  Remove the backup that is created during an update.
   remove <device> <image>                 Remove the specified image.
+  stats <device> <image>                  Show statistics about the provided image.
   list <device>                           List the deployed images.
 
 Examples:
@@ -75,6 +76,9 @@ Examples:
 
   Remove an image:
   - znx remove /dev/sdX vendor/release
+
+  Show statistics about an image:
+  - znx stats /dev/sdX vendor/release
 
   See the deployed images on a device:
   - znx list /dev/sdX
@@ -295,18 +299,6 @@ case $COMMAND in
 
 	;;
 
-	list)
-
-		[ $# -ne 2 ] &&
-			error "Bad command: wrong number of arguments."
-
-		_mount
-
-		cd $ZNX_DIR/$IMG_DIR
-		ls -1 -d */*
-
-	;;
-
 	stats)
 
 		[ $# -ne 2 ] &&
@@ -323,6 +315,17 @@ case $COMMAND in
 		[ -f $BACKUP_IMAGE ] &&
 			printf "Backup size: $(ls -sh $BACKUP_IMAGE | cut -d ' ' -f 1).\n"
 
+	;;
+
+	list)
+
+		[ $# -ne 2 ] &&
+			error "Bad command: wrong number of arguments."
+
+		_mount
+
+		cd $ZNX_DIR/$IMG_DIR
+		ls -1 -d */*
 	;;
 
 	-h|--help|help)
