@@ -11,7 +11,6 @@ COMMAND=$1
 DEVICE=$2
 IMAGE=$3
 URL=$4
-FTYPE=$5
 
 
 # -- Default file names.
@@ -22,7 +21,7 @@ BACKUP_IMAGE=IMAGE.0.zs-old
 
 # -- Images location.
 
-IMG_DIR=/boot_images
+STORE=/STORE
 
 
 # -- Commit that generated this build.
@@ -32,7 +31,7 @@ VERSION=@TRAVIS_COMMIT@
 
 # -- Prepare the mountpoint.
 
-ZNX_DIR=$(mktemp -d)
+TMP_MNT=$(mktemp -d)
 
 
 # -- Help text.
@@ -106,11 +105,11 @@ _mount () {
 	for d in $DEVICE*; do
 
 		blkid $d | grep -q ZNX_DATA &&
-			mount $d $ZNX_DIR
+			mount $d $TMP_MNT
 
 	done
 
-	mountpoint -q $ZNX_DIR ||
+	mountpoint -q $TMP_MNT ||
 		error "Device has not been initialized."
 
 }
@@ -119,11 +118,11 @@ clean () {
 
 	cd /
 
-	while mountpoint -q $ZNX_DIR; do
-		umount -f $ZNX_DIR
+	while mountpoint -q $TMP_MNT; do
+		umount -f $TMP_MNT
 	done
 
-	rm -rf $ZNX_DIR
+	rm -rf $TMP_MNT
 
 }
 
@@ -179,16 +178,16 @@ case $COMMAND in
 
 				mkfs.vfat -F 32 $d
 
-				mount $d $ZNX_DIR ||
+				mount $d $TMP_MNT ||
 					error "Unable to mount $d! Device initialization failed."
 
 				mkdir -p \
-					$ZNX_DIR/efi/boot \
-					$ZNX_DIR/boot/grub
+					$TMP_MNT/efi/boot \
+					$TMP_MNT/boot/grub
 
-				cp $PREFIX/grub.cfg $ZNX_DIR/boot/grub
-				cp $PREFIX/bootx64.efi $ZNX_DIR/efi/boot
-				cp -r $PREFIX/themes $ZNX_DIR/boot/grub
+				cp $PREFIX/grub.cfg $TMP_MNT/boot/grub
+				cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
+				cp -r $PREFIX/themes $TMP_MNT/boot/grub
 
 			}
 
@@ -212,17 +211,17 @@ case $COMMAND in
 		_mount
 		_print "Deploying $IMAGE."
 
-		mkdir -p $ZNX_DIR/$IMG_DIR/$IMAGE/DATA
+		mkdir -p $TMP_MNT/$STORE/$IMAGE/DATA
 
 		(
 
 			# -- Delete leftovers if the deployment is interrupted.
 
-			trap "rm -rf $ZNX_DIR/$IMG_DIR/${IMAGE%%\/*}" INT
+			trap "rm -rf $TMP_MNT/$STORE/${IMAGE%%\/*}" INT
 
 			[ -f $URL ] &&
-				cp $URL $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE ||
-				axel -a -o $ZNX_DIR/$IMG_DIR/$IMAGE/$ACTIVE_IMAGE $URL
+				cp $URL $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
+				axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $URL
 
 		) || error "Failed to deploy $IMAGE."
 
@@ -238,7 +237,7 @@ case $COMMAND in
 		_mount
 		_print "Updating $IMAGE."
 
-		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+		cd $TMP_MNT/$STORE/$IMAGE ||
 			error "\e[32m$IMAGE\e[0m is not deployed."
 
 		UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
@@ -261,7 +260,7 @@ case $COMMAND in
 		_mount
 		_print "Reverting last update of $IMAGE."
 
-		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+		cd $TMP_MNT/$STORE/$IMAGE ||
 			error "$IMAGE is not deployed."
 
 		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
@@ -279,7 +278,7 @@ case $COMMAND in
 		_mount
 		_print "Resetting $IMAGE."
 
-		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE/DATA/* ||
+		rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
 			error "Failed to reset $IMAGE."
 
 		_print "Successfully resetted $IMAGE."
@@ -294,7 +293,7 @@ case $COMMAND in
 		_mount
 		_print "Cleaning $IMAGE."
 
-		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+		cd $TMP_MNT/$STORE/$IMAGE ||
 			error "$IMAGE is not deployed."
 
 		rm -f $BACKUP_IMAGE
@@ -310,10 +309,10 @@ case $COMMAND in
 		_mount
 		_print "Removing $IMAGE."
 
-		[ -d $ZNX_DIR/$IMG_DIR/$IMAGE ] ||
+		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
 			error "$IMAGE is not deployed."
 
-		rm -rf $ZNX_DIR/$IMG_DIR/$IMAGE
+		rm -rf $TMP_MNT/$STORE/$IMAGE
 		_print "Successfully removed $IMAGE."
 
 	;;
@@ -325,7 +324,7 @@ case $COMMAND in
 
 		_mount
 
-		cd $ZNX_DIR/$IMG_DIR/$IMAGE ||
+		cd $TMP_MNT/$STORE/$IMAGE ||
 			error "$IMAGE is not deployed."
 
 		printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
@@ -343,7 +342,7 @@ case $COMMAND in
 
 		_mount
 
-		cd $ZNX_DIR/$IMG_DIR
+		cd $TMP_MNT/$STORE
 		ls -1 -d */*
 
 	;;
