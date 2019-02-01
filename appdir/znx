@@ -47,6 +47,7 @@ Options:
 Commands:
 
   init <device>                           Initialize the storage device.
+  restore-esp <device>                    Restore the ESP (EFI System Partition) of the given device.
   deploy <device> <image> <URL | path>    Deploy an image on a storage device.
   update <device> <image>                 Update the specified image.
   revert <device> <image>                 Revert to the previous version of the image.
@@ -60,6 +61,9 @@ Examples:
 
   Initialize a device:
   - znx init /dev/sdX
+
+  Restore the ESP of a device:
+  - znx restore /dev/sdX
 
   Deploy an image:
   - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
@@ -83,7 +87,7 @@ Examples:
   Show statistics about an image:
   - znx stats /dev/sdX vendor/release
 
-  See the deployed images on a device:
+  List the deployed images on a device:
   - znx list /dev/sdX
 
 "
@@ -185,9 +189,12 @@ case $COMMAND in
 					$TMP_MNT/efi/boot \
 					$TMP_MNT/boot/grub
 
-				cp $PREFIX/grub.cfg $TMP_MNT/boot/grub
 				cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
-				cp -r $PREFIX/themes $TMP_MNT/boot/grub
+
+				cp -r \
+					$PREFIX/themes \
+					$PREFIX/grub.cfg \
+					$TMP_MNT/boot/grub
 
 			}
 
@@ -200,6 +207,46 @@ case $COMMAND in
 		done
 
 		_print "Operation successful. Device is ready."
+
+	;;
+
+	restore-esp)
+
+		[ $# -eq 2 ] ||
+			error "Bad command: wrong number of arguments."
+
+		PREFIX=$(dirname $(readlink -f $0))
+
+		_print "Restoring the ESP on $DEVICE."
+
+		for d in $DEVICE*; do
+
+			blkid $d | grep -q ZNX_BOOT && {
+
+				mkfs.vfat -F 32 $d
+
+				mount $d $TMP_MNT ||
+					error "Unable to mount $d! Failed to restore the ESP."
+
+				mkdir -p \
+					$TMP_MNT/efi/boot \
+					$TMP_MNT/boot/grub
+
+				cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
+
+				cp -r \
+					$PREFIX/themes \
+					$PREFIX/grub.cfg \
+					$TMP_MNT/boot/grub
+
+			}
+
+			mountpoint -q $TMP_MNT &&
+				error "Device has not been initialized yet. Can't restore the ESP."
+
+		done
+
+		_print "Successfully restored the ESP on $DEVICE."
 
 	;;
 
