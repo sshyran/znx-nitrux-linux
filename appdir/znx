@@ -153,263 +153,284 @@ trap clean EXIT HUP INT TERM
 }
 
 
-# -- Run the specified command.
+# -- Initialize the device.
 
-case $COMMAND in
+_znx_init () {
 
-	init)
+	[ $# -eq 2 ] ||
+		error "Bad command: wrong number of arguments."
 
-		[ $# -eq 2 ] ||
-			error "Bad command: wrong number of arguments."
+	grep -q $DEVICE /proc/mounts &&
+		error "$DEVICE is mounted! Unmount it before continuing."
 
-		grep -q $DEVICE /proc/mounts &&
-			error "$DEVICE is mounted! Unmount it before continuing."
+	PREFIX=$(dirname $(readlink -f $0))
 
-		PREFIX=$(dirname $(readlink -f $0))
+	_print "Wiping $DEVICE. Please wait."
 
-		_print "Wiping $DEVICE. Please wait."
+	wipefs -af $DEVICE
+	sgdisk -Z \
+		-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
+		-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
-		wipefs -af $DEVICE
-		sgdisk -Z \
-			-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
-			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
+	for d in $DEVICE*; do
 
-		for d in $DEVICE*; do
+		# -- Prepare the boot partition.
 
-			# -- Prepare the boot partition.
+		blkid $d | grep -q ZNX_BOOT && {
 
-			blkid $d | grep -q ZNX_BOOT && {
+			mkfs.vfat -F 32 $d
 
-				mkfs.vfat -F 32 $d
-
-				mount $d $TMP_MNT ||
-					error "Unable to mount $d! Device initialization failed."
-
-				mkdir -p \
-					$TMP_MNT/efi/boot \
-					$TMP_MNT/boot/grub
-
-				cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
-
-				cp -r \
-					$PREFIX/themes \
-					$PREFIX/grub.cfg \
-					$TMP_MNT/boot/grub
-
-			}
-
-			# -- Prepare the data partition.
-
-			blkid $d | grep -q ZNX_DATA &&
-				mkfs.btrfs -f $d
+			mount $d $TMP_MNT ||
 				error "Unable to mount $d! Device initialization failed."
 
-		done
+			mkdir -p \
+				$TMP_MNT/efi/boot \
+				$TMP_MNT/boot/grub
 
-		_print "Operation successful. Device is ready."
+			cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
 
-	;;
+			cp -r \
+				$PREFIX/themes \
+				$PREFIX/grub.cfg \
+				$TMP_MNT/boot/grub
 
-	restore-esp)
+		}
 
-		[ $# -eq 2 ] ||
-			error "Bad command: wrong number of arguments."
+		# -- Prepare the data partition.
 
-		PREFIX=$(dirname $(readlink -f $0))
+		blkid $d | grep -q ZNX_DATA &&
+			mkfs.btrfs -f $d
+			error "Unable to mount $d! Device initialization failed."
 
-		_print "Restoring the ESP on $DEVICE."
+	done
 
-		for d in $DEVICE*; do
+	_print "Operation successful. Device is ready."
 
-			blkid $d | grep -q ZNX_BOOT && {
+}
 
-				mkfs.vfat -F 32 $d
 
-				mount $d $TMP_MNT ||
-					error "Unable to mount $d! Failed to restore the ESP."
+# -- Attempt to restore a broken ESP.
 
-				mkdir -p \
-					$TMP_MNT/efi/boot \
-					$TMP_MNT/boot/grub
+_znx_restore-esp () {
 
-				cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
+	[ $# -eq 2 ] ||
+		error "Bad command: wrong number of arguments."
 
-				cp -r \
-					$PREFIX/themes \
-					$PREFIX/grub.cfg \
-					$TMP_MNT/boot/grub
+	PREFIX=$(dirname $(readlink -f $0))
 
-			}
+	_print "Restoring the ESP on $DEVICE."
 
-			mountpoint -q $TMP_MNT &&
-				error "Device has not been initialized yet. Can't restore the ESP."
+	for d in $DEVICE*; do
 
-		done
+		blkid $d | grep -q ZNX_BOOT && {
 
-		_print "Successfully restored the ESP on $DEVICE."
+			mkfs.vfat -F 32 $d
 
-	;;
+			mount $d $TMP_MNT ||
+				error "Unable to mount $d! Failed to restore the ESP."
 
-	deploy)
+			mkdir -p \
+				$TMP_MNT/efi/boot \
+				$TMP_MNT/boot/grub
 
-		[ $# -ne 4 -o $# -ne 5 ] &&
-			error "Bad command: wrong number of arguments."
+			cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
 
-		_mount
-		_print "Deploying $IMAGE."
+			cp -r \
+				$PREFIX/themes \
+				$PREFIX/grub.cfg \
+				$TMP_MNT/boot/grub
 
-		mkdir -p $TMP_MNT/$STORE/$IMAGE/DATA
+		}
 
-		(
+		mountpoint -q $TMP_MNT &&
+			error "Device has not been initialized yet. Can't restore the ESP."
 
-			# -- Delete leftovers if the deployment is interrupted.
+	done
 
-			trap "rm -rf $TMP_MNT/$STORE/${IMAGE%%\/*}" INT
+	_print "Successfully restored the ESP on $DEVICE."
 
-			[ -f $URL ] &&
-				cp $URL $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
-				axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $URL
+}
 
-		) || error "Failed to deploy $IMAGE."
 
-		_print "Successfully deployed $IMAGE."
+# -- Deploy an image.
 
-	;;
+_znx_deploy () {
 
-	update)
+	[ $# -ne 4 -o $# -ne 5 ] &&
+		error "Bad command: wrong number of arguments."
 
-		[ $# -ne 3 ] &&
-			error "Bad command: wrong number of arguments."
+	_mount
+	_print "Deploying $IMAGE."
 
-		_mount
-		_print "Updating $IMAGE."
+	mkdir -p $TMP_MNT/$STORE/$IMAGE/DATA
 
-		cd $TMP_MNT/$STORE/$IMAGE ||
-			error "\e[32m$IMAGE\e[0m is not deployed."
+	(
 
-		UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
+		# -- Delete leftovers if the deployment is interrupted.
 
-		[ ${#UPDATE_URL} -eq 0 ] &&
-			error "Unable to gather update information from $IMAGE. Aborting update."
+		trap "rm -rf $TMP_MNT/$STORE/${IMAGE%%\/*}" INT
 
-		zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
-			error "Failed to update $IMAGE."
+		[ -f $URL ] &&
+			cp $URL $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
+			axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $URL
 
-		_print "Successfully updated $IMAGE."
+	) || error "Failed to deploy $IMAGE."
 
-	;;
+	_print "Successfully deployed $IMAGE."
 
-	revert)
+}
 
-		[ $# -ne 3 ] &&
-			error "Bad command: wrong number of arguments."
 
-		_mount
-		_print "Reverting last update of $IMAGE."
+# -- Update an image.
 
-		cd $TMP_MNT/$STORE/$IMAGE ||
-			error "$IMAGE is not deployed."
+_znx_update () {
 
-		mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
-			error "Couldn't perform a rollback on $IMAGE."
+	[ $# -ne 3 ] &&
+		error "Bad command: wrong number of arguments."
 
-		_print "Sucessfully performed rollback on $IMAGE."
+	_mount
+	_print "Updating $IMAGE."
 
-	;;
+	cd $TMP_MNT/$STORE/$IMAGE ||
+		error "\e[32m$IMAGE\e[0m is not deployed."
 
-	reset)
+	UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
 
-		[ $# -ne 3 ] &&
-			error "Bad command: wrong number of arguments."
+	[ ${#UPDATE_URL} -eq 0 ] &&
+		error "Unable to gather update information from $IMAGE. Aborting update."
 
-		_mount
-		_print "Resetting $IMAGE."
+	zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
+		error "Failed to update $IMAGE."
 
-		rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
-			error "Failed to reset $IMAGE."
+	_print "Successfully updated $IMAGE."
 
-		_print "Successfully resetted $IMAGE."
+}
 
-	;;
 
-	clean)
+# -- Revert an update.
 
-		[ $# -ne 3 ] &&
-			error "Bad command: wrong number of arguments."
+_znx_revert () {
 
-		_mount
-		_print "Cleaning $IMAGE."
+	[ $# -ne 3 ] &&
+		error "Bad command: wrong number of arguments."
 
-		cd $TMP_MNT/$STORE/$IMAGE ||
-			error "$IMAGE is not deployed."
+	_mount
+	_print "Reverting last update of $IMAGE."
 
-		rm -f $BACKUP_IMAGE
-		_print "Sucessfully cleaned $IMAGE."
+	cd $TMP_MNT/$STORE/$IMAGE ||
+		error "$IMAGE is not deployed."
 
-	;;
+	mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
+		error "Couldn't perform a rollback on $IMAGE."
 
-	remove)
+	_print "Sucessfully performed rollback on $IMAGE."
 
-		[ $# -ne 3 ] &&
-			error "Bad command: wrong number of arguments."
+}
 
-		_mount
-		_print "Removing $IMAGE."
 
-		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
-			error "$IMAGE is not deployed."
+# -- Clear all user data for the specified image.
 
-		rm -rf $TMP_MNT/$STORE/$IMAGE
-		_print "Successfully removed $IMAGE."
+_znx_reset () {
 
-	;;
+	[ $# -ne 3 ] &&
+		error "Bad command: wrong number of arguments."
 
-	stats)
+	_mount
+	_print "Resetting $IMAGE."
 
-		[ $# -ne 2 ] &&
-			error "Bad command: wrong number of arguments."
+	rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
+		error "Failed to reset $IMAGE."
 
-		_mount
+	_print "Successfully resetted $IMAGE."
 
-		cd $TMP_MNT/$STORE/$IMAGE ||
-			error "$IMAGE is not deployed."
+}
 
-		printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
-		printf "Last update: %$(date -u -r $ACTIVE_IMAGE).\n"
 
-		[ -f $BACKUP_IMAGE ] &&
-			printf "Backup size: $(ls -sh $BACKUP_IMAGE | cut -d ' ' -f 1).\n"
+# -- Delete the backup image that is created after an update.
 
-	;;
+_znx_clean () {
 
-	list)
+	[ $# -ne 3 ] &&
+		error "Bad command: wrong number of arguments."
 
-		[ $# -ne 2 ] &&
-			error "Bad command: wrong number of arguments."
+	_mount
+	_print "Cleaning $IMAGE."
 
-		_mount
+	cd $TMP_MNT/$STORE/$IMAGE ||
+		error "$IMAGE is not deployed."
 
-		cd $TMP_MNT/$STORE
-		ls -1 -d */*
+	rm -f $BACKUP_IMAGE
+	_print "Sucessfully cleaned $IMAGE."
 
-	;;
+}
 
-	-h|--help|help)
 
-		printf "$HELP"
+# -- Remove the specified image.
 
-	;;
+_znx_remove () {
 
-	-v|--version|version)
+	[ $# -ne 3 ] &&
+		error "Bad command: wrong number of arguments."
 
-		printf "$VERSION\n"
+	_mount
+	_print "Removing $IMAGE."
 
-	;;
+	[ -d $TMP_MNT/$STORE/$IMAGE ] ||
+		error "$IMAGE is not deployed."
 
-	*)
+	rm -rf $TMP_MNT/$STORE/$IMAGE
+	_print "Successfully removed $IMAGE."
 
-		error "No such command '$COMMAND'."
+}
 
-	;;
+
+# -- Show statistics about the given image.
+
+_znx_stats () {
+
+	[ $# -ne 2 ] &&
+		error "Bad command: wrong number of arguments."
+
+	_mount
+
+	cd $TMP_MNT/$STORE/$IMAGE ||
+		error "$IMAGE is not deployed."
+
+	printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
+	printf "Last update: %$(date -u -r $ACTIVE_IMAGE).\n"
+
+	[ -f $BACKUP_IMAGE ] &&
+		printf "Backup size: $(ls -sh $BACKUP_IMAGE | cut -d ' ' -f 1).\n"
+
+}
+
+
+# -- List the deployed images.
+
+_znx_list () {
+
+	[ $# -ne 2 ] &&
+		error "Bad command: wrong number of arguments."
+
+	_mount
+
+	cd $TMP_MNT/$STORE
+	ls -1 -d */*
+
+}
+
+
+# -- Option handling.
+
+case $1 in
+
+	-h|--help|help) printf "$HELP"; exit ;;
+	-v|--version|version) printf "$VERSION\n"; exit ;;
 
 esac
+
+
+# -- Run the requested command.
+
+_znx_$@ ||
+	error "No such command '$COMMAND'."
