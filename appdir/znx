@@ -148,8 +148,8 @@ trap clean EXIT HUP INT TERM
 	error "$DEVICE is not a block device"
 
 [ ${#IMAGE} -gt 0 ] && {
-	printf %s $IMAGE | grep -qE '^[[:alnum:]_-]+/[[:alnum:]_-]+$' ||
-		error "The image name must match the regular expression: '^[[:alnum:]_-]+/[[:alnum:]_-]+$'."
+	printf %s $IMAGE | grep -qE '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$' ||
+		error "The image name must match the regular expression: '^^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$'."
 }
 
 
@@ -267,6 +267,7 @@ _znx_deploy () {
 	(
 
 		# -- Delete leftovers if the deployment is interrupted.
+		# -- See issue #23 (https://github.com/Nitrux/znx/issues/23).
 
 		trap "rm -rf $TMP_MNT/$STORE/${IMAGE%%\/*}" INT
 
