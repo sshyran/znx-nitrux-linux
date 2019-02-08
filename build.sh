@@ -25,35 +25,6 @@ chmod +x appdir/znx
 sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 
-# -- Populate appdir.
-
-mkdir -p appdir/bin
-
-printf \
-'[Desktop Entry]
-Type=Application
-Name=znx
-Exec=znx
-Icon=znx
-Comment="Operating system manager."
-Categories=Utility;
-OnlyShowIn=
-' > appdir/znx.desktop
-
-
-# -- Create a wrapper script.
-
-printf \
-'#! /bin/sh
-
-export LD_LIBRARY_PATH=$APPDIR/usr/lib:$LD_LIBRARY_PATH
-export PATH=$PATH:$APPDIR/bin:$APPDIR/sbin:$APPDIR/usr/bin:$APPDIR/usr/sbin
-exec $APPDIR/znx $@
-' > appdir/AppRun
-
-chmod a+x appdir/AppRun
-
-
 # -- Copy binaries and its dependencies to appdir.
 
 ./copier axel appdir
@@ -72,7 +43,7 @@ grub-mkimage \
 	-O x86_64-efi \
 	-o appdir/bootx64.efi \
 	boot linux search normal configfile \
-	part_gpt btrfs fat iso9660 loopback \
+	part_gpt btrfs ext2 fat iso9660 loopback \
 	test keystatus gfxmenu regexp probe \
 	efi_gop efi_uga all_video gfxterm font \
 	echo read ls cat png jpeg halt reboot
@@ -104,3 +75,10 @@ chmod a+x appimage-wrapper
 
 mkdir out
 ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$(printf $TRAVIS_BRANCH | sed 's/master/stable/')
+
+
+# -- Embed update information in the AppImage.
+
+UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-development/znx_$TRAVIS_BRANCH"
+
+printf "$UPDATE_URL" | dd of=".AppImage" bs=1 seek=33651 count=512 conv=notrunc 2> /dev/null

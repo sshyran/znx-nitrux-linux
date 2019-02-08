@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=znx
+Exec=znx
+Icon=znx
+Comment="Operating system manager."
+Categories=Utility;
+OnlyShowIn=
