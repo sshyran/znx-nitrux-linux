@@ -157,7 +157,7 @@ trap clean EXIT HUP INT TERM
 
 _znx_init () {
 
-	[ $# -eq 2 ] ||
+	[ $# -eq 1 ] ||
 		error "Bad command: wrong number of arguments."
 
 	grep -q $DEVICE /proc/mounts &&
@@ -213,7 +213,7 @@ _znx_init () {
 
 _znx_restore-esp () {
 
-	[ $# -eq 2 ] ||
+	[ $# -eq 1 ] ||
 		error "Bad command: wrong number of arguments."
 
 	PREFIX=$(dirname $(readlink -f $0))
@@ -256,7 +256,7 @@ _znx_restore-esp () {
 
 _znx_deploy () {
 
-	[ $# -ne 4 -o $# -ne 5 ] &&
+	[ $# -ne 3 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -286,7 +286,7 @@ _znx_deploy () {
 
 _znx_update () {
 
-	[ $# -ne 3 ] &&
+	[ $# -ne 2 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -312,7 +312,7 @@ _znx_update () {
 
 _znx_revert () {
 
-	[ $# -ne 3 ] &&
+	[ $# -ne 2 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -333,7 +333,7 @@ _znx_revert () {
 
 _znx_reset () {
 
-	[ $# -ne 3 ] &&
+	[ $# -ne 2 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -351,7 +351,7 @@ _znx_reset () {
 
 _znx_clean () {
 
-	[ $# -ne 3 ] &&
+	[ $# -ne 2 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -370,7 +370,7 @@ _znx_clean () {
 
 _znx_remove () {
 
-	[ $# -ne 3 ] &&
+	[ $# -ne 2 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
@@ -410,7 +410,7 @@ _znx_stats () {
 
 _znx_list () {
 
-	[ $# -ne 2 ] &&
+	[ $# -ne 1 ] &&
 		error "Bad command: wrong number of arguments."
 
 	_mount
