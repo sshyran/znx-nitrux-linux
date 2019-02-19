@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 
 # -- Exit on errors.
 
@@ -108,7 +108,7 @@ _mount () {
 
 	for d in $DEVICE*; do
 
-		blkid $d | grep -q ZNX_DATA &&
+		lsblk -ndo PARTLABEL $d | grep -q ZNX_DATA &&
 			mount $d $TMP_MNT
 
 	done
@@ -149,7 +149,7 @@ trap clean EXIT HUP INT TERM
 
 [ ${#IMAGE} -gt 0 ] && {
 	printf %s $IMAGE | grep -qE '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$' ||
-		error "The image name must match the regular expression: '^^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$'."
+		error "The image name must match the regular expression: '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$'."
 }
 
 
@@ -176,7 +176,7 @@ _znx_init () {
 
 		# -- Prepare the boot partition.
 
-		blkid $d | grep -q ZNX_BOOT && {
+		lsblk -ndo PARTLABEL $d | grep -q ZNX_BOOT && {
 
 			mkfs.vfat -F 32 $d
 
@@ -198,9 +198,8 @@ _znx_init () {
 
 		# -- Prepare the data partition.
 
-		blkid $d | grep -q ZNX_DATA &&
+		lsblk -ndo PARTLABEL $d | grep -q ZNX_DATA &&
 			mkfs.btrfs -f $d
-			error "Unable to mount $d! Device initialization failed."
 
 	done
 
@@ -222,7 +221,7 @@ _znx_restore-esp () {
 
 	for d in $DEVICE*; do
 
-		blkid $d | grep -q ZNX_BOOT && {
+		lsblk -ndo PARTLABEL $d | grep -q ZNX_BOOT && {
 
 			mkfs.vfat -F 32 $d
 
@@ -242,10 +241,10 @@ _znx_restore-esp () {
 
 		}
 
-		mountpoint -q $TMP_MNT &&
-			error "Device has not been initialized yet. Can't restore the ESP."
-
 	done
+
+	mountpoint -q $TMP_MNT ||
+		error "Device has not been initialized yet. Can't restore the ESP."
 
 	_print "Successfully restored the ESP on $DEVICE."
 
@@ -398,10 +397,8 @@ _znx_stats () {
 		error "$IMAGE is not deployed."
 
 	printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
-	printf "Last update: %$(date -u -r $ACTIVE_IMAGE).\n"
-
-	[ -f $BACKUP_IMAGE ] &&
-		printf "Backup size: $(ls -sh $BACKUP_IMAGE | cut -d ' ' -f 1).\n"
+	printf "Last update: $(date -u -r $ACTIVE_IMAGE).\n"
+	printf "Backup size: $({ ls -sh $BACKUP_IMAGE 2> /dev/null || echo 0; } | cut -d ' ' -f 1).\n"
 
 }
 
@@ -415,7 +412,10 @@ _znx_list () {
 
 	_mount
 
-	cd $TMP_MNT/$STORE
+	[ -d $TMP_MNT/$STORE ] &&
+		cd $TMP_MNT/$STORE ||
+		exit
+
 	ls -1 -d */*
 
 }
@@ -433,5 +433,4 @@ esac
 
 # -- Run the requested command.
 
-_znx_$@ ||
-	error "No such command '$COMMAND'."
+_znx_$@
