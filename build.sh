@@ -29,7 +29,7 @@ sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 ./copier axel appdir
 ./copier zsync appdir
-./copier blkid appdir
+./copier lsblk appdir
 ./copier sgdisk appdir
 ./copier wipefs appdir
 ./copier mkfs.vfat appdir
