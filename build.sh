@@ -42,6 +42,7 @@ grub-mkimage \
 	-C xz \
 	-O x86_64-efi \
 	-o appdir/bootx64.efi \
+	-p /boot/grub \
 	boot linux search normal configfile \
 	part_gpt btrfs ext2 fat iso9660 loopback \
 	test keystatus gfxmenu regexp probe \

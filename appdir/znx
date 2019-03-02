@@ -47,7 +47,7 @@ Options:
 Commands:
 
   init <device>                           Initialize the storage device.
-  restore-esp <device>                    Restore the ESP (EFI System Partition) of the given device.
+  restore_esp <device>                    Restore the ESP (EFI System Partition) of the given device.
   deploy <device> <image> <URL | path>    Deploy an image on a storage device.
   update <device> <image>                 Update the specified image.
   revert <device> <image>                 Revert to the previous version of the image.
@@ -106,15 +106,32 @@ _print () {
 
 _mount () {
 
-	for d in $DEVICE*; do
+	ZNX_DATA=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_DATA | cut -d ' ' -f 1)
 
-		lsblk -ndo PARTLABEL $d | grep -q ZNX_DATA &&
-			mount $d $TMP_MNT
+	[ ${#ZNX_DATA} -eq 0 ] &&
+		error "Device has not been intialized."
 
-	done
+	mount $ZNX_DATA $TMP_MNT
 
-	mountpoint -q $TMP_MNT ||
-		error "Device has not been initialized."
+}
+
+_prepare_esp () {
+
+	PREFIX=$(dirname $(readlink -f $0))
+
+	mkfs.vfat -F 32 $1
+	mount $1 $TMP_MNT
+
+	mkdir -p \
+		$TMP_MNT/efi/boot \
+		$TMP_MNT/boot/grub
+
+	cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
+
+	cp -r \
+		$PREFIX/themes \
+		$PREFIX/grub.cfg \
+		$TMP_MNT/boot/grub
 
 }
 
@@ -127,6 +144,9 @@ clean () {
 	done
 
 	rm -rf $TMP_MNT
+
+	[ ${#EXIT_MSG} -gt 0 ] &&
+		_print "$EXIT_MSG"
 
 }
 
@@ -163,47 +183,25 @@ _znx_init () {
 	grep -q $DEVICE /proc/mounts &&
 		error "$DEVICE is mounted! Unmount it before continuing."
 
-	PREFIX=$(dirname $(readlink -f $0))
-
 	_print "Wiping $DEVICE. Please wait."
 
 	wipefs -af $DEVICE
-	sgdisk -Z \
+		sgdisk -Z \
 		-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
 		-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
-	for d in $DEVICE*; do
-
-		# -- Prepare the boot partition.
-
-		lsblk -ndo PARTLABEL $d | grep -q ZNX_BOOT && {
-
-			mkfs.vfat -F 32 $d
-
-			mount $d $TMP_MNT ||
-				error "Unable to mount $d! Device initialization failed."
-
-			mkdir -p \
-				$TMP_MNT/efi/boot \
-				$TMP_MNT/boot/grub
-
-			cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
-
-			cp -r \
-				$PREFIX/themes \
-				$PREFIX/grub.cfg \
-				$TMP_MNT/boot/grub
-
-		}
-
-		# -- Prepare the data partition.
-
-		lsblk -ndo PARTLABEL $d | grep -q ZNX_DATA &&
-			mkfs.btrfs -f $d
-
+	while [ ${#ZNX_BOOT} -eq 0 -o ${#ZNX_BOOT} -eq 0 ]; do
+		sleep 1
+		ZNX_BOOT=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_BOOT | cut -d ' ' -f 1)
+		ZNX_DATA=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_DATA | cut -d ' ' -f 1)
 	done
 
-	_print "Operation successful. Device is ready."
+	# -- Create the filesystems.
+
+	_prepare_esp $ZNX_BOOT
+	mkfs.btrfs -f $ZNX_DATA
+
+	EXIT_MSG="Operation successful. Device is ready."
 
 }
 
@@ -215,38 +213,13 @@ _znx_restore_esp () {
 	[ $# -eq 1 ] ||
 		error "Bad command: wrong number of arguments."
 
-	PREFIX=$(dirname $(readlink -f $0))
-
 	_print "Restoring the ESP on $DEVICE."
 
-	for d in $DEVICE*; do
+	ZNX_BOOT=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_BOOT | cut -d ' ' -f 1)
 
-		lsblk -ndo PARTLABEL $d | grep -q ZNX_BOOT && {
+	_prepare_esp $ZNX_BOOT
 
-			mkfs.vfat -F 32 $d
-
-			mount $d $TMP_MNT ||
-				error "Unable to mount $d! Failed to restore the ESP."
-
-			mkdir -p \
-				$TMP_MNT/efi/boot \
-				$TMP_MNT/boot/grub
-
-			cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
-
-			cp -r \
-				$PREFIX/themes \
-				$PREFIX/grub.cfg \
-				$TMP_MNT/boot/grub
-
-		}
-
-	done
-
-	mountpoint -q $TMP_MNT ||
-		error "Device has not been initialized yet. Can't restore the ESP."
-
-	_print "Successfully restored the ESP on $DEVICE."
+	EXIT_MSG="Successfully restored the ESP on $DEVICE."
 
 }
 
@@ -260,6 +233,9 @@ _znx_deploy () {
 
 	_mount
 	_print "Deploying $IMAGE."
+
+	[ -d $TMP_MNT/$STORE/$IMAGE ] &&
+		error "$IMAGE is already deployed."
 
 	mkdir -p $TMP_MNT/$STORE/$IMAGE/DATA
 
@@ -276,7 +252,7 @@ _znx_deploy () {
 
 	) || error "Failed to deploy $IMAGE."
 
-	_print "Successfully deployed $IMAGE."
+	EXIT_MSG="Successfully deployed $IMAGE."
 
 }
 
@@ -302,7 +278,7 @@ _znx_update () {
 	zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
 		error "Failed to update $IMAGE."
 
-	_print "Successfully updated $IMAGE."
+	EXIT_MSG="Successfully updated $IMAGE."
 
 }
 
@@ -323,7 +299,7 @@ _znx_revert () {
 	mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
 		error "Couldn't perform a rollback on $IMAGE."
 
-	_print "Sucessfully performed rollback on $IMAGE."
+	EXIT_MSG="Sucessfully performed rollback on $IMAGE."
 
 }
 
@@ -341,7 +317,7 @@ _znx_reset () {
 	rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
 		error "Failed to reset $IMAGE."
 
-	_print "Successfully resetted $IMAGE."
+	EXIT_MSG="Successfully resetted $IMAGE."
 
 }
 
@@ -360,7 +336,7 @@ _znx_clean () {
 		error "$IMAGE is not deployed."
 
 	rm -f $BACKUP_IMAGE
-	_print "Sucessfully cleaned $IMAGE."
+	EXIT_MSG="Sucessfully cleaned $IMAGE."
 
 }
 
@@ -379,7 +355,7 @@ _znx_remove () {
 		error "$IMAGE is not deployed."
 
 	rm -rf $TMP_MNT/$STORE/$IMAGE
-	_print "Successfully removed $IMAGE."
+	EXIT_MSG="Successfully removed $IMAGE."
 
 }
 
