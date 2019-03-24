@@ -10,7 +10,7 @@ set -e
 COMMAND=$1
 DEVICE=$2
 IMAGE=$3
-URL=$4
+URL="$4"
 
 
 # -- Default file names.
@@ -19,7 +19,7 @@ ACTIVE_IMAGE=IMAGE.0
 BACKUP_IMAGE=IMAGE.0.zs-old
 
 
-# -- Images location.
+# -- Store for images.
 
 STORE=/STORE
 
@@ -248,9 +248,9 @@ _znx_deploy () {
 
 		trap "rm -rf $TMP_MNT/$STORE/${IMAGE%%\/*}" INT
 
-		[ -f $URL ] &&
-			cp $URL $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
-			axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $URL
+		[ -f "$URL" ] &&
+			cp "$URL" $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
+			axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE "$URL"
 
 	) || error "Failed to deploy $IMAGE."
 
@@ -411,4 +411,4 @@ esac
 
 # -- Run the requested command.
 
-_znx_$@
+_znx_$COMMAND $DEVICE $IMAGE "$URL"
