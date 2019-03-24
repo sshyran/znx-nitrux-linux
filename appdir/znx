@@ -192,7 +192,7 @@ _znx_init () {
 		-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
 		-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
-	while [ ${#ZNX_BOOT} -eq 0 -o ${#ZNX_BOOT} -eq 0 ]; do
+	while [ ${#ZNX_DATA} -eq 0 -o ${#ZNX_BOOT} -eq 0 ]; do
 		sleep 1
 		ZNX_BOOT=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_BOOT | cut -d ' ' -f 1)
 		ZNX_DATA=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_DATA | cut -d ' ' -f 1)
