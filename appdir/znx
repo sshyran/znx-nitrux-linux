@@ -13,15 +13,18 @@ IMAGE=$3
 URL="$4"
 
 
-# -- Default file names.
+# -- Settings.
+
+PREFIX=$(dirname $(readlink -f $0))
 
 ACTIVE_IMAGE=IMAGE.0
 BACKUP_IMAGE=IMAGE.0.zs-old
 
-
-# -- Store for images.
-
 STORE=/STORE
+
+HELP="$(cat $PREFIX/HELP)"
+
+TMP_MNT=$(mktemp -d)
 
 
 # -- Commit that generated this build.
@@ -29,95 +32,23 @@ STORE=/STORE
 VERSION=@TRAVIS_COMMIT@
 
 
-# -- Prepare the mountpoint.
-
-TMP_MNT=$(mktemp -d)
-
-
-# -- Help text.
-
-HELP=\
-"Usage: znx <option | command>
-
-Options:
-
-  -v, --version                          Print the commit hash that generated this binary.
-  -h, --help                             Print this help.
-
-Commands:
-
-  init <device>                           Initialize the storage device.
-  restore_esp <device>                    Restore the ESP (EFI System Partition) of the given device.
-  deploy <device> <image> <URL | path>    Deploy an image on a storage device.
-  update <device> <image>                 Update the specified image.
-  revert <device> <image>                 Revert to the previous version of the image.
-  clean <device> <image>                  Remove the backup that is created during an update.
-  reset <device> <image>                  Delete all user data of the specified image.
-  remove <device> <image>                 Remove the specified image.
-  stats <device> <image>                  Show statistics about the provided image.
-  list <device>                           List the deployed images.
-
-Examples:
-
-  Initialize a device:
-  - znx init /dev/sdX
-
-  Restore the ESP of a device:
-  - znx restore /dev/sdX
-
-  Deploy an image:
-  - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
-  - znx deploy /dev/sdX vendor/release /path/to/image.iso
-
-  Update an image:
-  - znx update /dev/sdX vendor/release
-
-  Revert an update (downgrade):
-  - znx revert /dev/sdX vendor/release
-
-  Delete the backup of an image:
-  - znx clean /dev/sdX vendor/release
-
-  Reset an image to its original state:
-  - znx reset /dev/sdX vendor/release
-
-  Remove an image:
-  - znx remove /dev/sdX vendor/release
-
-  Show statistics about an image:
-  - znx stats /dev/sdX vendor/release
-
-  List the deployed images on a device:
-  - znx list /dev/sdX
-
-"
-
-
 # -- Helper functions.
 
-error () {
-	printf %b "znx: \e[31mError:\e[0m $@\n" >& 2
-	exit 1
-}
-
-_print () {
-	printf %b "znx: $@\n"
-}
+_e () { printf %b "znx: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
+_p () { printf %b "znx: $@\n"; }
 
 _mount () {
 
 	ZNX_DATA=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_DATA | cut -d ' ' -f 1)
 
 	[ ${#ZNX_DATA} -eq 0 ] &&
-		error "Device has not been intialized."
+		_e "Device has not been intialized."
 
 	mount $ZNX_DATA $TMP_MNT
 
 }
 
 _prepare_esp () {
-
-	PREFIX=$(dirname $(readlink -f $0))
 
 	mkfs.vfat -F 32 $1
 	mount $1 $TMP_MNT
@@ -135,7 +66,7 @@ _prepare_esp () {
 
 }
 
-clean () {
+_on_exit () {
 
 	cd /
 
@@ -146,32 +77,32 @@ clean () {
 	rm -rf $TMP_MNT
 
 	[ ${#EXIT_MSG} -gt 0 ] &&
-		_print "$EXIT_MSG"
+		_p "$EXIT_MSG"
 
 }
 
 
-# -- Always perform a cleanup after exiting.
+# -- Always perform a cleanup on exit.
 
-trap clean EXIT HUP INT TERM
+trap _on_exit EXIT HUP INT TERM
 
 
 # -- Sanity checks.
 
 [ $# -eq 0 ] &&
-	error "No command given!"
+	_e "No command given!"
 
 [ $(id -u) -eq 0 ] || {
 	printf "$HELP"
-	error "This program MUST be ran as the super user."
+	_e "This program MUST be ran as the super user."
 }
 
 [ -b $DEVICE ] ||
-	error "$DEVICE is not a block device"
+	_e "$DEVICE is not a block device"
 
 [ ${#IMAGE} -gt 0 ] && {
 	printf %s $IMAGE | grep -qE '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$' ||
-		error "The image name must match the regular expression: '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$'."
+		_e "Bad image name (must match '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$')."
 }
 
 
@@ -180,12 +111,12 @@ trap clean EXIT HUP INT TERM
 _znx_init () {
 
 	[ $# -eq 1 ] ||
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	grep -q $DEVICE /proc/mounts &&
-		error "$DEVICE is mounted! Unmount it before continuing."
+		_e "$DEVICE is mounted! Unmount it before continuing."
 
-	_print "Wiping $DEVICE. Please wait."
+	_p "Wiping $DEVICE. Please wait."
 
 	wipefs -af $DEVICE
 		sgdisk -Z \
@@ -213,9 +144,9 @@ _znx_init () {
 _znx_restore_esp () {
 
 	[ $# -eq 1 ] ||
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
-	_print "Restoring the ESP on $DEVICE."
+	_p "Restoring the ESP on $DEVICE."
 
 	ZNX_BOOT=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_BOOT | cut -d ' ' -f 1)
 
@@ -231,13 +162,13 @@ _znx_restore_esp () {
 _znx_deploy () {
 
 	[ $# -ne 3 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Deploying $IMAGE."
+	_p "Deploying $IMAGE."
 
 	[ -d $TMP_MNT/$STORE/$IMAGE ] &&
-		error "$IMAGE is already deployed."
+		_e "$IMAGE is already deployed."
 
 	mkdir -p $TMP_MNT/$STORE/$IMAGE/DATA
 
@@ -252,7 +183,7 @@ _znx_deploy () {
 			cp "$URL" $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE ||
 			axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE "$URL"
 
-	) || error "Failed to deploy $IMAGE."
+	) || _e "Failed to deploy $IMAGE."
 
 	EXIT_MSG="Successfully deployed $IMAGE."
 
@@ -264,21 +195,21 @@ _znx_deploy () {
 _znx_update () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Updating $IMAGE."
+	_p "Updating $IMAGE."
 
 	cd $TMP_MNT/$STORE/$IMAGE ||
-		error "\e[32m$IMAGE\e[0m is not deployed."
+		_e "\e[32m$IMAGE\e[0m is not deployed."
 
 	UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
 
 	[ ${#UPDATE_URL} -eq 0 ] &&
-		error "Unable to gather update information from $IMAGE. Aborting update."
+		_e "Unable to gather update information from $IMAGE. Aborting update."
 
 	zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
-		error "Failed to update $IMAGE."
+		_e "Failed to update $IMAGE."
 
 	EXIT_MSG="Successfully updated $IMAGE."
 
@@ -290,16 +221,16 @@ _znx_update () {
 _znx_revert () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Reverting last update of $IMAGE."
+	_p "Reverting last update of $IMAGE."
 
 	cd $TMP_MNT/$STORE/$IMAGE ||
-		error "$IMAGE is not deployed."
+		_e "$IMAGE is not deployed."
 
 	mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
-		error "Couldn't perform a rollback on $IMAGE."
+		_e "Couldn't perform a rollback on $IMAGE."
 
 	EXIT_MSG="Sucessfully performed rollback on $IMAGE."
 
@@ -311,13 +242,13 @@ _znx_revert () {
 _znx_reset () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Resetting $IMAGE."
+	_p "Resetting $IMAGE."
 
 	rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
-		error "Failed to reset $IMAGE."
+		_e "Failed to reset $IMAGE."
 
 	EXIT_MSG="Successfully resetted $IMAGE."
 
@@ -329,13 +260,13 @@ _znx_reset () {
 _znx_clean () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Cleaning $IMAGE."
+	_p "Cleaning $IMAGE."
 
 	cd $TMP_MNT/$STORE/$IMAGE ||
-		error "$IMAGE is not deployed."
+		_e "$IMAGE is not deployed."
 
 	rm -f $BACKUP_IMAGE
 	EXIT_MSG="Sucessfully cleaned $IMAGE."
@@ -348,13 +279,13 @@ _znx_clean () {
 _znx_remove () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
-	_print "Removing $IMAGE."
+	_p "Removing $IMAGE."
 
 	[ -d $TMP_MNT/$STORE/$IMAGE ] ||
-		error "$IMAGE is not deployed."
+		_e "$IMAGE is not deployed."
 
 	rm -rf $TMP_MNT/$STORE/$IMAGE
 	EXIT_MSG="Successfully removed $IMAGE."
@@ -367,12 +298,12 @@ _znx_remove () {
 _znx_stats () {
 
 	[ $# -ne 2 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
 
 	cd $TMP_MNT/$STORE/$IMAGE ||
-		error "$IMAGE is not deployed."
+		_e "$IMAGE is not deployed."
 
 	printf "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1).\n"
 	printf "Last update: $(date -u -r $ACTIVE_IMAGE).\n"
@@ -386,7 +317,7 @@ _znx_stats () {
 _znx_list () {
 
 	[ $# -ne 1 ] &&
-		error "Bad command: wrong number of arguments."
+		_e "Bad command: wrong number of arguments."
 
 	_mount
 
