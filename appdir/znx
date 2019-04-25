@@ -10,7 +10,9 @@ set -e
 COMMAND=$1
 DEVICE=$2
 IMAGE=$3
-URL="$4"
+URL=$4
+
+shift
 
 
 # -- Settings.
@@ -36,6 +38,7 @@ VERSION=@TRAVIS_COMMIT@
 
 _e () { printf %b "znx: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
 _p () { printf %b "znx: $@\n"; }
+_arg_n_chk () { [ $1 -eq $2 ] || _e "Bad command: wrong number of arguments."; }
 
 _mount () {
 
@@ -110,8 +113,7 @@ trap _on_exit EXIT HUP INT TERM
 
 _znx_init () {
 
-	[ $# -eq 1 ] ||
-		_e "Bad command: wrong number of arguments."
+	_arg_n_chk $# 1
 
 	grep -q $DEVICE /proc/mounts &&
 		_e "$DEVICE is mounted! Unmount it before continuing."
@@ -143,8 +145,7 @@ _znx_init () {
 
 _znx_restore_esp () {
 
-	[ $# -eq 1 ] ||
-		_e "Bad command: wrong number of arguments."
+	_arg_n_chk $# 1
 
 	_p "Restoring the ESP on $DEVICE."
 
@@ -161,9 +162,7 @@ _znx_restore_esp () {
 
 _znx_deploy () {
 
-	[ $# -ne 3 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 3
 	_mount
 	_p "Deploying $IMAGE."
 
@@ -194,9 +193,7 @@ _znx_deploy () {
 
 _znx_update () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 	_p "Updating $IMAGE."
 
@@ -220,9 +217,7 @@ _znx_update () {
 
 _znx_revert () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 	_p "Reverting last update of $IMAGE."
 
@@ -241,9 +236,7 @@ _znx_revert () {
 
 _znx_reset () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 	_p "Resetting $IMAGE."
 
@@ -259,9 +252,7 @@ _znx_reset () {
 
 _znx_clean () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 	_p "Cleaning $IMAGE."
 
@@ -278,9 +269,7 @@ _znx_clean () {
 
 _znx_remove () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 	_p "Removing $IMAGE."
 
@@ -297,9 +286,7 @@ _znx_remove () {
 
 _znx_stats () {
 
-	[ $# -ne 2 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 2
 	_mount
 
 	cd $TMP_MNT/$STORE/$IMAGE ||
@@ -316,9 +303,7 @@ _znx_stats () {
 
 _znx_list () {
 
-	[ $# -ne 1 ] &&
-		_e "Bad command: wrong number of arguments."
-
+	_arg_n_chk $# 1
 	_mount
 
 	[ -d $TMP_MNT/$STORE ] &&
@@ -332,14 +317,14 @@ _znx_list () {
 
 # -- Option handling.
 
-case $1 in
+case $COMMAND in
 
-	-h|--help|help) printf "$HELP"; exit ;;
-	-v|--version|version) printf "$VERSION\n"; exit ;;
+	-h|--help|help) printf "$HELP"; exit;;
+	-v|--version|version) printf "$VERSION\n"; exit;;
 
 esac
 
 
 # -- Run the requested command.
 
-_znx_$COMMAND $DEVICE $IMAGE "$URL"
+_znx_$COMMAND $DEVICE $IMAGE $URL
