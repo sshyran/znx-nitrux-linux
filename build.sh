@@ -75,7 +75,7 @@ wget -q https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimag
 chmod a+x appimage-wrapper
 
 mkdir out
-ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$(printf $TRAVIS_BRANCH | sed 's/master/stable/')
+ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$TRAVIS_BRANCH
 
 
 # -- Embed update information in the AppImage.
