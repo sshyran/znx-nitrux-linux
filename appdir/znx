@@ -12,8 +12,6 @@ DEVICE=$2
 IMAGE=$3
 URL=$4
 
-shift
-
 
 # -- Settings.
 
@@ -23,9 +21,6 @@ ACTIVE_IMAGE=IMAGE.0
 BACKUP_IMAGE=IMAGE.0.zs-old
 
 STORE=/STORE
-
-HELP="$(cat $PREFIX/HELP)"
-
 TMP_MNT=$(mktemp -d)
 
 
@@ -95,10 +90,8 @@ trap _on_exit EXIT HUP INT TERM
 [ $# -eq 0 ] &&
 	_e "No command given!"
 
-[ $(id -u) -eq 0 ] || {
-	printf "$HELP"
+[ $(id -u) -eq 0 ] ||
 	_e "This program MUST be ran as the super user."
-}
 
 [ -b $DEVICE ] ||
 	_e "$DEVICE is not a block device"
@@ -319,7 +312,7 @@ _znx_list () {
 
 case $COMMAND in
 
-	-h|--help|help) printf "$HELP"; exit;;
+	-h|--help|help) cat $PREFIX/HELP; exit;;
 	-v|--version|version) printf "$VERSION\n"; exit;;
 
 esac
