@@ -198,7 +198,7 @@ _znx_update () {
 	[ ${#UPDATE_URL} -eq 0 ] &&
 		_e "Unable to gather update information from $IMAGE. Aborting update."
 
-	zsync ${UPDATE_URL/zsync|} -o $ACTIVE_IMAGE ||
+	zsync ${UPDATE_URL#zsync|} -o $ACTIVE_IMAGE ||
 		_e "Failed to update $IMAGE."
 
 	EXIT_MSG="Successfully updated $IMAGE."
