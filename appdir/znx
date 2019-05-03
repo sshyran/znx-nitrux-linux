@@ -4,7 +4,6 @@
 
 set -e
 
-
 # -- Argument handling.
 
 COMMAND=$1
@@ -35,6 +34,21 @@ _e () { printf %b "znx: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
 _p () { printf %b "znx: $@\n"; }
 _arg_n_chk () { [ $1 -eq $2 ] || _e "Bad command: wrong number of arguments."; }
 
+_on_exit () {
+
+	cd /
+
+	while mountpoint -q $TMP_MNT; do
+		umount -f $TMP_MNT
+	done
+
+	rm -rf $TMP_MNT
+
+	[ ${#EXIT_MSG} -gt 0 ] &&
+		_p "$EXIT_MSG"
+
+}
+
 _mount () {
 
 	ZNX_DATA=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_DATA | cut -d ' ' -f 1)
@@ -61,21 +75,6 @@ _prepare_esp () {
 		$PREFIX/themes \
 		$PREFIX/grub.cfg \
 		$TMP_MNT/boot/grub
-
-}
-
-_on_exit () {
-
-	cd /
-
-	while mountpoint -q $TMP_MNT; do
-		umount -f $TMP_MNT
-	done
-
-	rm -rf $TMP_MNT
-
-	[ ${#EXIT_MSG} -gt 0 ] &&
-		_p "$EXIT_MSG"
 
 }
 
@@ -193,7 +192,13 @@ _znx_update () {
 	cd $TMP_MNT/$STORE/$IMAGE ||
 		_e "\e[32m$IMAGE\e[0m is not deployed."
 
+	# -- This will be removed soon.
 	UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
+
+	#U_TMP_MNT=$(mktemp -d)
+	#mount $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $U_TMP_MNT
+	#UPDATE_URL=$(grep '^UPDATE_URL ' $U_TMP_MNT/.INFO | awk '{ print $2 }')
+	#umount -f $U_TMP_MNT
 
 	[ ${#UPDATE_URL} -eq 0 ] &&
 		_e "Unable to gather update information from $IMAGE. Aborting update."
