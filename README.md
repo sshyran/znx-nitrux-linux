@@ -20,7 +20,7 @@ to the AppImage and run as root:
 ./znx deploy /dev/sdX nitrux/stable http://repo.nxos.org:8000/nitrux_release_stable
 ```
 
-*NOTE:*
+**NOTE:**
 _If you are not so into typing commands in a terminal, you can check [znx-gui](https://github.com/Nitrux/znx-gui), which
 is a Qt-based frontend for `znx`, and is provided as an AppImage._
 
