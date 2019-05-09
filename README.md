@@ -22,7 +22,7 @@ to the AppImage and run as root:
 
 **NOTE:**
 _If you are not so into typing commands in a terminal, you can check [znx-gui](https://github.com/Nitrux/znx-gui), which
-is a Qt-based frontend for `znx`, and is provided as an AppImage._
+is a Qt-based graphical frontend for `znx`, and is provided as an AppImage._
 
 Be sure to replace `/dev/sdX` with the name of your device. These commands will initialize
 the storage device and deploy the `nitrux/stable` image on the device.
