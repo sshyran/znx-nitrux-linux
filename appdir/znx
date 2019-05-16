@@ -6,10 +6,10 @@ set -e
 
 # -- Argument handling.
 
-COMMAND=$1
-DEVICE=$2
-IMAGE=$3
-URL=$4
+COMMAND="$1"
+DEVICE="$2"
+IMAGE="$3"
+URL="$4"
 
 
 # -- Settings.
@@ -96,8 +96,8 @@ trap _on_exit EXIT HUP INT TERM
 	_e "$DEVICE is not a block device"
 
 [ ${#IMAGE} -gt 0 ] && {
-	printf %s $IMAGE | grep -qE '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$' ||
-		_e "Bad image name (must match '^[a-zA-Z0-9._]+/[a-zA-Z0-9._]+$')."
+	printf %s $IMAGE | grep -qE '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$' ||
+		_e "Bad image name (must match '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$')."
 }
 
 
