@@ -10,13 +10,15 @@ TRAVIS_BRANCH=$2
 
 apt-get -qq -y update > /dev/null
 apt-get -qq -y install wget patchelf file libcairo2 > /dev/null
-apt-get -qq -y install busybox-static axel gdisk zsync util-linux btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
+apt-get -qq -y install xorriso axel gdisk zsync util-linux btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://raw.githubusercontent.com/luis-lavaire/bin/master/copier
+wget -q https://raw.githubusercontent.com/nitrux/mkiso/master/mkiso
 
 chmod +x appimagetool
 chmod +x copier
+chmod +x mkiso
 chmod +x appdir/znx
 
 
@@ -27,11 +29,13 @@ sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 # -- Copy binaries and its dependencies to appdir.
 
+./copier mkiso appdir
 ./copier axel appdir
 ./copier zsync appdir
 ./copier lsblk appdir
 ./copier sgdisk appdir
 ./copier wipefs appdir
+./copier xorriso appdir
 ./copier mkfs.vfat appdir
 ./copier mkfs.btrfs appdir
 
