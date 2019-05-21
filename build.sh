@@ -65,9 +65,6 @@ grub-mkimage \
 	delete_blacklisted
 	rm functions.sh
 
-	wget -qO runtime https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-x86_64
-	chmod a+x runtime
-
 	find lib/x86_64-linux-gnu -type f -exec patchelf --set-rpath '$ORIGIN/././' {} \;
 	find bin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
 	find sbin -type f -exec patchelf --set-rpath '$ORIGIN/../lib/x86_64-linux-gnu' {} \;
@@ -78,12 +75,7 @@ grub-mkimage \
 wget -q https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimage-wrapper
 chmod a+x appimage-wrapper
 
-mkdir out
-ARCH=x84_64 ./appimage-wrapper appimagetool appdir out/znx_$TRAVIS_BRANCH
-
-
-# -- Embed update information in the AppImage.
-
 UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-development/znx_$TRAVIS_BRANCH"
 
-printf "$UPDATE_URL" | dd of=".AppImage" bs=1 seek=33651 count=512 conv=notrunc 2> /dev/null
+mkdir out
+ARCH=x84_64 ./appimage-wrapper appimagetool -u "$UPDATE_URL" appdir out/znx_$TRAVIS_BRANCH
