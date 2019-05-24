@@ -334,4 +334,10 @@ case "$COMMAND" in
 
 	;;
 
+	*)
+
+		_e "Bad command line: '$COMMAND'."
+
+	;;
+
 esac
