@@ -7,8 +7,6 @@ DEVICE="$2"
 IMAGE="$3"
 URL="$4"
 
-shift
-
 
 # -- Settings.
 
@@ -98,6 +96,8 @@ trap _on_exit EXIT HUP INT TERM
 		_e "Bad image name (must match '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$')."
 }
 
+
+shift
 
 case "$COMMAND" in
 
