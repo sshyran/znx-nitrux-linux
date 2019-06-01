@@ -8,7 +8,7 @@ Options:
 Commands:
 
   init <device>                           Initialize the storage device.
-  restore_esp <device>                    Restore the ESP (EFI System Partition) of the given device.
+  restore <device>                        Restore the ESP (EFI System Partition) of the given device.
   deploy <device> <image> <URL | path>    Deploy an image on a storage device. Do not use whitespaces in filenames.
   update <device> <image>                 Update the specified image.
   revert <device> <image>                 Revert to the previous version of the image.
