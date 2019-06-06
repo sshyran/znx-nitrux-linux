@@ -74,3 +74,8 @@ Be sure to replace `/dev/sdX` with the name of your device, use the commands `ls
 
 **NOTE:**
 _If you are not so into typing commands in a terminal, you can check [znx-gui](https://github.com/Nitrux/znx-gui), which is a Qt-based graphical frontend for `znx`, and is provided as an AppImage._
+
+# Issues
+If you find problems with the contents of this repository please create an issue.
+
+©2018 Nitrux Latinoamericana S.C.
