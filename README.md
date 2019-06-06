@@ -71,3 +71,6 @@ Examples:
 ```
 
 Be sure to replace `/dev/sdX` with the name of your device, use the commands `lsblk`, `fdisk` or `blkid` to find the correct device.
+
+**NOTE:**
+_If you are not so into typing commands in a terminal, you can check [znx-gui](https://github.com/Nitrux/znx-gui), which is a Qt-based graphical frontend for `znx`, and is provided as an AppImage._
