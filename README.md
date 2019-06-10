@@ -1,4 +1,4 @@
-# znx
+# ![znx](https://nxos.org/wp-content/uploads/2018/09/znx_logo-min_medium.png)
 
 [![Build Status](https://travis-ci.org/Nitrux/znx.svg?branch=master)](https://travis-ci.org/Nitrux/znx)
 
@@ -78,4 +78,4 @@ _If you are not so into typing commands in a terminal, you can check [znx-gui](h
 # Issues
 If you find problems with the contents of this repository please create an issue.
 
-©2018 Nitrux Latinoamericana S.C.
+©2019 Nitrux Latinoamericana S.C.
