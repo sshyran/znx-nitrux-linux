@@ -11,7 +11,7 @@ TRAVIS_BRANCH=$2
 apt-get -qq -y update > /dev/null
 apt-get -qq -y install wget patchelf file libcairo2 > /dev/null
 apt-get -qq -y install xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
-apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev > /dev/null
+apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison > /dev/null
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://gitlab.com/nitrux/tools/raw/master/copier
@@ -26,7 +26,7 @@ chmod +x appdir/znx
 
 git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33
 
-$(
+(
   cd util-linux
 
   ./autogen.sh 
