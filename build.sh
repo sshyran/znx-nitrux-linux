@@ -10,8 +10,7 @@ TRAVIS_BRANCH=$2
 
 apt-get -qq -y update > /dev/null
 apt-get -qq -y install wget patchelf file libcairo2 > /dev/null
-apt-get -qq -y install xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
-apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison > /dev/null
+apt-get -qq -y install mtools xorriso axel gdisk zsync util-linux btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/copier
@@ -22,22 +21,6 @@ chmod +x copier
 chmod +x mkiso
 chmod +x appdir/znx
 
-# -- Build util-linux 2.33
-
-git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33
-
-(
-  cd util-linux
-
-  ./autogen.sh 
-  ./configure
-
-  make -j$(nproc)
-  make -j$(nproc) install
-)
-
-# Remove old libsmartcols libraries for lsblk to find the correct one
-rm /lib/x86_64-linux-gnu/libsmartcols.so.1*
 
 # -- Write the commit that generated this build.
 
@@ -48,6 +31,7 @@ sed -i "s/@TRAVIS_COMMIT@/${TRAVIS_COMMIT:0:7}/" appdir/znx
 
 ./copier mkiso appdir
 ./copier axel appdir
+./copier mcopy appdir
 ./copier zsync appdir
 ./copier lsblk appdir
 ./copier sgdisk appdir
