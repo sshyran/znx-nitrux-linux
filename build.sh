@@ -14,8 +14,8 @@ apt-get -qq -y install xorriso axel gdisk zsync btrfs-progs dosfstools grub-comm
 apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison > /dev/null
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-wget -q https://gitlab.com/nitrux/tools/raw/master/copier
-wget -q https://gitlab.com/nitrux/tools/raw/master/mkiso
+wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/copier
+wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/mkiso
 
 chmod +x appimagetool
 chmod +x copier
