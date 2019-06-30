@@ -195,11 +195,18 @@ case "$COMMAND" in
 		_mount
 		_p "Updating $IMAGE."
 
-		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
+		# -- This `cd` has two goals:
+		# -- Test that the image actually exists, and
+		# -- to, obviously, switch directory because
+		# -- zsync scans existing files in the current
+		# -- working directory, and the download is
+		# -- performed there, also.
+
+		cd $TMP_MNT/$STORE/$IMAGE ||
 			_e "\e[32m$IMAGE\e[0m is not deployed."
 
 		# -- This will be removed soon.
-		# -- UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
+		UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
 
 		U_TMP_MNT=$(mktemp -d)
 		mount -r $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $U_TMP_MNT
@@ -207,7 +214,7 @@ case "$COMMAND" in
 		umount -f $U_TMP_MNT
 
 		[ $UPDATE_URL ] ||
-			_e "Unable to gather update information from $IMAGE. Aborting update."
+			_e "$IMAGE did not provided any information for the update; aborting."
 
 		zsync ${UPDATE_URL#zsync\|} -o $ACTIVE_IMAGE ||
 			_e "Failed to update $IMAGE."
