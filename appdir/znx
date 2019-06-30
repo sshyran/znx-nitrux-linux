@@ -200,15 +200,15 @@ case "$COMMAND" in
 		# -- This will be removed soon.
 		UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
 
-		U_TMP_MNT=$(mktemp -d)
-		mount $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $U_TMP_MNT
-		UPDATE_URL=${UPDATE_URL:-$(awk '/^UPDATE_URL / { print $2 }' $U_TMP_MNT/.INFO)}
-		umount -f $U_TMP_MNT
+# 		U_TMP_MNT=$(mktemp -d)
+# 		mount -r $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE $U_TMP_MNT
+# 		UPDATE_URL=${UPDATE_URL:-$(awk '/^UPDATE_URL/ { print $2 }' $U_TMP_MNT/.INFO)}
+# 		umount -f $U_TMP_MNT
 
 		[ $UPDATE_URL ] ||
 			_e "Unable to gather update information from $IMAGE. Aborting update."
 
-		zsync ${UPDATE_URL#zsync\|} -o $ACTIVE_IMAGE ||
+		zsync ${UPDATE_URL#*zsync\|} -o $ACTIVE_IMAGE ||
 			_e "Failed to update $IMAGE."
 
 		EXIT_MSG="Successfully updated $IMAGE."
