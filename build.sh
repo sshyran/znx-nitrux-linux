@@ -10,12 +10,15 @@ TRAVIS_BRANCH=$2
 
 apt-get -qq -y update > /dev/null
 apt-get -qq -y install wget patchelf file libcairo2 > /dev/null
-apt-get -qq -y install mtools xorriso axel gdisk zsync util-linux btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
+apt-get -qq -y install mtools xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
 apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison > /dev/null
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/copier
 wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/mkiso
+
+wget -q http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libmount1_2.33.1-0.1ubuntu2_amd64.deb
+dpkg -i libmount1_2.33.1-0.1ubuntu2_amd64.deb
 
 chmod +x appimagetool
 chmod +x copier
