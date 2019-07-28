@@ -216,7 +216,7 @@ case "$COMMAND" in
 		[ $UPDATE_URL ] ||
 			_e "$IMAGE did not provided any information for the update; aborting."
 
-		zsync ${UPDATE_URL#zsync\|} -o $ACTIVE_IMAGE ||
+		zsync ${UPDATE_URL#*zsync\|} -o $ACTIVE_IMAGE ||
 			_e "Failed to update $IMAGE."
 
 		EXIT_MSG="Successfully updated $IMAGE."
