@@ -177,7 +177,7 @@ case "$COMMAND" in
 			[ -d "$URL" ] &&
 				mkiso "$URL" $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE
 
-			[ ! -d "$URL" ] && [ ! -f "$URL" ] &&
+			[ -e "$URL" ] ||
 				axel -a -o $TMP_MNT/$STORE/$IMAGE/$ACTIVE_IMAGE "$URL"
 
 		) || _e "Failed to deploy $IMAGE."
