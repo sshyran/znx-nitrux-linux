@@ -26,21 +26,21 @@ chmod +x copier
 chmod +x mkiso
 chmod +x appdir/znx
 
-# -- Build util-linux 2.33	
+# -- Build util-linux 2.33
 
- git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33	
+git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33
 
- (	
-  cd util-linux	
+(
+	cd util-linux
 
-   ./autogen.sh 	
-  ./configure	
+	./autogen.sh
+	./configure
 
-   make -j$(nproc)	
-  make -j$(nproc) install	
-)	
+	make -j$(nproc)
+	make -j$(nproc) install
+)
 
- # Remove old libsmartcols libraries for lsblk to find the correct one	
+ # Remove old libsmartcols libraries for lsblk to find the correct one
 rm /lib/x86_64-linux-gnu/libsmartcols.so.1*
 rm /lib/x86_64-linux-gnu/libmount.so.1*
 
