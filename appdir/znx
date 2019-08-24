@@ -26,8 +26,8 @@ VERSION=@TRAVIS_COMMIT@
 
 # -- Helper functions.
 
-_e () { printf %b "znx: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
-_p () { printf %b "znx: $@\n"; }
+_e () { printf %b "${0##*/}: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
+_p () { printf %b "${0##*/}: $@\n"; }
 _arg_ck () { [ $1 -eq $2 ] || _e "Bad command: wrong number of arguments."; }
 
 _on_exit () {
@@ -183,6 +183,27 @@ case "$COMMAND" in
 		) || _e "Failed to deploy $IMAGE."
 
 		EXIT_MSG="Successfully deployed $IMAGE."
+
+	;;
+
+
+	# -- Rename an image.
+
+	rename)
+
+		_arg_ck $# 3
+		_mount
+		_p "Renaming $IMAGE."
+
+		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
+			_e "$IMAGE is not deployed."
+
+		printf %s $URL | grep -qE '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$' ||
+			_e "Bad image name (must match '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$')."
+
+		mv $TMP_MNT/$STORE/$IMAGE $TMP_MNT/$STORE/$URL
+
+		EXIT_MSG="Successfully renamed $IMAGE to $URL."
 
 	;;
 
