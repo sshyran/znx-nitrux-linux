@@ -114,7 +114,8 @@ case "$COMMAND" in
 		_p "Wiping $DEVICE. Please wait."
 
 		wipefs -af $DEVICE
-			sgdisk -Z \
+
+		sgdisk -Z \
 			-n 1::64M -t 1:EF00 -c 1:ZNX_BOOT \
 			-N 2 -t 2:8300 -c 2:ZNX_DATA $DEVICE
 
