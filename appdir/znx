@@ -26,8 +26,7 @@ VERSION=@TRAVIS_COMMIT@
 
 # -- Helper functions.
 
-_e () { printf %b "${0##*/}: \e[31mError:\e[0m $@\n" >& 2; exit 1; }
-_p () { printf %b "${0##*/}: $@\n"; }
+_e () { echo -e "${0##*/}: \e[31mError:\e[0m $@" >& 2; exit 1; }
 _arg_ck () { [ $1 -eq $2 ] || _e "Bad command: wrong number of arguments."; }
 
 _on_exit () {
@@ -41,7 +40,7 @@ _on_exit () {
 	rm -rf $TMP_MNT
 
 	[ "$EXIT_MSG" ] &&
-		_p "$EXIT_MSG"
+		echo "$EXIT_MSG"
 
 }
 
@@ -111,7 +110,7 @@ case "$COMMAND" in
 		grep -q $DEVICE /proc/mounts &&
 			_e "$DEVICE is mounted! Unmount it before continuing."
 
-		_p "Wiping $DEVICE. Please wait."
+		echo "Wiping $DEVICE. Please wait."
 
 		wipefs -af $DEVICE
 
@@ -141,7 +140,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 1
 
-		_p "Restoring the ESP on $DEVICE."
+		echo "Restoring the ESP on $DEVICE."
 
 		ZNX_BOOT=$(lsblk -no PATH,PARTLABEL $DEVICE | grep ZNX_BOOT | cut -d ' ' -f 1)
 
@@ -158,7 +157,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 3
 		_mount
-		_p "Deploying $IMAGE."
+		echo "Deploying $IMAGE."
 
 		[ -d $TMP_MNT/$STORE/$IMAGE ] &&
 			_e "$IMAGE is already deployed."
@@ -194,7 +193,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 3
 		_mount
-		_p "Renaming $IMAGE."
+		echo "Renaming $IMAGE."
 
 		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
 			_e "$IMAGE is not deployed."
@@ -215,7 +214,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 2
 		_mount
-		_p "Updating $IMAGE."
+		echo "Updating $IMAGE."
 
 		# -- This `cd` has two goals:
 		# -- Test that the image actually exists, and
@@ -252,7 +251,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 2
 		_mount
-		_p "Reverting last update of $IMAGE."
+		echo "Reverting last update of $IMAGE."
 
 		cd $TMP_MNT/$STORE/$IMAGE ||
 			_e "$IMAGE is not deployed."
@@ -271,7 +270,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 2
 		_mount
-		_p "Resetting $IMAGE."
+		echo "Resetting $IMAGE."
 
 		rm -rf $TMP_MNT/$STORE/$IMAGE/DATA/* ||
 			_e "Failed to reset $IMAGE."
@@ -287,7 +286,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 2
 		_mount
-		_p "Cleaning $IMAGE."
+		echo "Cleaning $IMAGE."
 
 		cd $TMP_MNT/$STORE/$IMAGE ||
 			_e "$IMAGE is not deployed."
@@ -304,7 +303,7 @@ case "$COMMAND" in
 
 		_arg_ck $# 2
 		_mount
-		_p "Removing $IMAGE."
+		echo "Removing $IMAGE."
 
 		[ -d $TMP_MNT/$STORE/$IMAGE ] ||
 			_e "$IMAGE is not deployed."
