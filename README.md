@@ -1,4 +1,4 @@
-# ![znx](https://nxos.org/wp-content/uploads/2018/09/znx_logo-min_medium.png)
+# ![znx](https://nxos.b-cdn.net/wp-content/uploads/2019/10/znx_logo-min.png)
 
 [![Build Status](https://travis-ci.org/Nitrux/znx.svg?branch=master)](https://travis-ci.org/Nitrux/znx)
 
