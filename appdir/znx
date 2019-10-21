@@ -297,6 +297,10 @@ _remove () {
 
 	rm -rf $TMP_MNT/STORE/$2
 	echo "Successfully removed '$2'."
+
+	# -- Silently remove empty directories. Issue #52.
+
+	find $TMP_MNT/STORE/ -maxdepth 2 -type d -empty -delete
 }
 
 
@@ -356,7 +360,10 @@ VERSION=@TRAVIS_COMMIT@
 
 # -- Option handling.
 
-case $1 in
+CMD=$1
+shift
+
+case $CMD in
 
 	-h|--help|help)
 
@@ -372,81 +379,18 @@ case $1 in
 
 	;;
 
-	init)
+	init)      _init $@      ;;
+	fix-esp)   _fix_esp $@   ;;
+	deploy)    _deploy $@    ;;
+	rename)    _rename $@    ;;
+	update)    _update $@    ;;
+	rollback)  _rollback $@  ;;
+	reset)     _reset $@     ;;
+	clean)     _clean $@     ;;
+	remove)    _clean $@     ;;
+	status)    _status $@    ;;
+	list)      _list $@      ;;
 
-		shift
-		_init $@
-
-	;;
-
-	fix-esp)
-
-		shift
-		_fix_esp $@
-
-	;;
-
-	deploy)
-
-		shift
-		_deploy $@
-
-	;;
-
-	rename)
-
-		shift
-		_rename $@
-
-	;;
-
-	update)
-
-		shift
-		_update $@
-
-	;;
-
-	rollback)
-
-		shift
-		_rollback $@
-
-	;;
-
-	reset)
-
-		shift
-		_reset $@
-
-	;;
-
-	clean)
-
-		shift
-		_clean $@
-
-	;;
-
-	remove)
-
-		shift
-		_clean $@
-
-	;;
-
-	status)
-
-		shift
-		_status $@
-
-	;;
-
-	list)
-
-		shift
-		_list $@
-
-	;;
+	*) _e "Unknown command '$1'.";;
 
 esac
