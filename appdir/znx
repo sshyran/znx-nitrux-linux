@@ -300,7 +300,7 @@ _remove () {
 
 	# -- Silently remove empty directories. Issue #52.
 
-	find $TMP_MNT/STORE/ -maxdepth 2 -type d -empty -delete
+	rmdir --ignore-fail-on-non-empty $TMP_MNT/STORE/*
 }
 
 
