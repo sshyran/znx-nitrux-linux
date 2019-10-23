@@ -8,7 +8,7 @@ TRAVIS_BRANCH=$2
 
 # -- Install dependencies.
 
-apt -qq -y update > /dev/null
+apt -qq update > /dev/null
 apt -yy install wget patchelf file libcairo2 mtools xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison
 
 
@@ -128,7 +128,7 @@ grub-mkimage \
 wget -q https://raw.githubusercontent.com/Nitrux/appimage-wrapper/master/appimage-wrapper
 chmod a+x appimage-wrapper
 
-UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-development/znx_$TRAVIS_BRANCH"
+UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-$TRAVIS_BRANCH/znx_$TRAVIS_BRANCH"
 
 mkdir out
 ARCH=x84_64 ./appimage-wrapper appimagetool -u "$UPDATE_URL" appdir out/znx_$TRAVIS_BRANCH
