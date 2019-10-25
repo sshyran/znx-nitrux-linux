@@ -25,8 +25,8 @@ http://mirrors.kernel.org/ubuntu/pool/main/n/ncurses/libtinfo6_6.1+20181013-2ubu
 http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub-efi-amd64-bin_2.02-2ubuntu8.13_amd64.deb
 http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub-common_2.02-2ubuntu8.13_amd64.deb
 http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub2-common_2.02-2ubuntu8.13_amd64.deb
-http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libmount1_2.33.1-0.1ubuntu2_amd64.deb
-http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libsmartcols1_2.33.1-0.1ubuntu2_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libmount1_2.34-0.1ubuntu2_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libsmartcols1_2.34-0.1ubuntu2_amd64.deb
 '
 
 mkdir /deb_files
@@ -53,9 +53,8 @@ chmod +x mkiso
 chmod +x appdir/znx
 
 
-# -- Build util-linux 2.33.
-
-git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33
+# -- Build util-linux 2.34.
+git clone --depth 1 --single-branch --branch v2.34 https://github.com/karelzak/util-linux.git
 
 (
 	cd util-linux
