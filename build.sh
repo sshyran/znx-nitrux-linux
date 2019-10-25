@@ -69,10 +69,10 @@ chmod +x appdir/znx
 # )
 # 
 # 
-# # -- Remove old libsmartcols libraries for lsblk to find the correct one.
-# 
-# rm /lib/x86_64-linux-gnu/libsmartcols.so.1*
-# rm /lib/x86_64-linux-gnu/libmount.so.1*
+# -- Remove old libsmartcols libraries for lsblk to find the correct one.
+
+rm /lib/x86_64-linux-gnu/libsmartcols.so.1*
+rm /lib/x86_64-linux-gnu/libmount.so.1*
 
 
 # -- Write the commit that generated this build.
