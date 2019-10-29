@@ -338,6 +338,24 @@ _list () {
 }
 
 
+#   Show help.
+#   _show_help.
+
+_show_help () {
+	cat $PREFIX/HELP
+	exit
+}
+
+
+#   Show help.
+#   _show_version.
+
+_show_help () {
+	echo $VERSION
+	exit
+}
+
+
 # -- Settings.
 
 PREFIX=${0%/*}
@@ -360,24 +378,13 @@ VERSION=@TRAVIS_COMMIT@
 
 # -- Option handling.
 
+[ $# -gt 0 ] &&
+	_e "No command given. Try '$0 -h' for more information."
+
 CMD=$1
 shift
 
 case $CMD in
-
-	-h|--help|help)
-
-		cat $PREFIX/HELP
-		exit
-
-	;;
-
-	-v|--version|version)
-
-		echo "$VERSION"
-		exit
-
-	;;
 
 	init)      _init $@      ;;
 	fix-esp)   _fix_esp $@   ;;
@@ -391,6 +398,9 @@ case $CMD in
 	status)    _status $@    ;;
 	list)      _list $@      ;;
 
-	*) _e "Unknown command '$1'.";;
+	-h|--help)     _show_help     ;;
+	-v|--version)  _show_version  ;;
+
+	*) _e "Unknown command '$1'." ;;
 
 esac
