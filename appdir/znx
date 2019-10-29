@@ -362,10 +362,26 @@ VERSION=@TRAVIS_COMMIT@
 #    Option handling.
 
 [ $# -gt 0 ] ||
-	_e "No command given. Try '$0 -h' for more information."
+	_e "No command given. Try '${0##*/} -h' for more information."
 
 CMD=$1
 shift
+
+case $CMD in
+
+	-h|--help)     cat $PREFIX/HELP  ;;
+	-v|--version)  echo $VERSION     ;;
+
+esac
+
+
+#   Check if it is being ran as root.
+
+[ $(id -u) -eq 0 ] ||
+	_e "This program must be ran as root."
+
+
+#   Command handling.
 
 case $CMD in
 
@@ -377,12 +393,9 @@ case $CMD in
 	rollback)  _rollback $@  ;;
 	reset)     _reset $@     ;;
 	clean)     _clean $@     ;;
-	remove)    _clean $@     ;;
+	remove)    _remove $@    ;;
 	status)    _status $@    ;;
 	list)      _list $@      ;;
-
-	-h|--help)     cat $PREFIX/HELP  ;;
-	-v|--version)  echo $VERSION     ;;
 
 	*) _e "Unknown command '$1'." ;;
 
