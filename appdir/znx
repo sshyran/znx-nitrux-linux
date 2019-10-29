@@ -104,8 +104,8 @@ _init () {
 	local boot_part data_part
 
 	until [ "$boot_part" -a "$data_part" ]; do
-		boot_part=$(find_part $1 ZNX_BOOT)
-		data_part=$(find_part $1 ZNX_DATA)
+		boot_part=$(_find_part $1 ZNX_BOOT)
+		data_part=$(_find_part $1 ZNX_DATA)
 		sleep 1
 	done
 
