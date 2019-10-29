@@ -75,8 +75,7 @@ _create_esp () {
 	cp $PREFIX/bootx64.efi $TMP_MNT/efi/boot
 
 	cp -r \
-		$PREFIX/themes \
-		$PREFIX/grub.cfg \
+		$PREFIX/grub \
 		$TMP_MNT/boot/grub
 }
 
@@ -104,9 +103,9 @@ _init () {
 	local boot_part data_part
 
 	until [ "$boot_part" -a "$data_part" ]; do
+		sleep 1
 		boot_part=$(_find_part $1 ZNX_BOOT)
 		data_part=$(_find_part $1 ZNX_DATA)
-		sleep 1
 	done
 
 	_create_esp $boot_part
