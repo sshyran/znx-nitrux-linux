@@ -2,22 +2,22 @@ Usage: znx <option | command>
 
 Options:
 
-  -v, --version                          Print the commit hash that generated this binary.
   -h, --help                             Print this help.
+  -v, --version                          Print the commit hash that generated this binary.
 
 Commands:
 
-  init <device>                           Initialize the storage device.
-  restore <device>                        Restore the ESP (EFI System Partition) of the given device.
-  deploy <device> <image> <URL | path>    Deploy an image on a storage device. Do not use whitespaces in filenames.
-  rename <device> <old_name> <new_name>   Rename the specified image.
-  update <device> <image>                 Update the specified image.
-  revert <device> <image>                 Revert to the previous version of the image.
-  clean <device> <image>                  Remove the backup that is created during an update.
-  reset <device> <image>                  Delete all user data of the specified image.
-  remove <device> <image>                 Remove the specified image.
-  stats <device> <image>                  Show statistics about the provided image.
-  list <device>                           List the deployed images.
+  init <device>                          Initialize the storage device.
+  restore <device>                       Restore the ESP (EFI System Partition) of the given device.
+  deploy <device> <image> <URL | path>   Deploy an image on a storage device. Do not use whitespaces in filenames.
+  rename <device> <old_name> <new_name>  Rename the specified image.
+  update <device> <image>                Update the specified image.
+  revert <device> <image>                Revert to the previous version of the image.
+  clean <device> <image>                 Remove the backup that is created during an update.
+  reset <device> <image>                 Delete all user data of the specified image.
+  remove <device> <image>                Remove the specified image.
+  stats <device> <image>                 Show statistics about the provided image.
+  list <device>                          List the deployed images.
 
 Examples:
 

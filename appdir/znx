@@ -339,24 +339,6 @@ _list () {
 }
 
 
-#   Show help.
-#   _show_help.
-
-_show_help () {
-	cat $PREFIX/HELP
-	exit
-}
-
-
-#   Show help.
-#   _show_version.
-
-_show_help () {
-	echo $VERSION
-	exit
-}
-
-
 #    Settings.
 
 PREFIX=${0%/*}
@@ -372,7 +354,7 @@ TMP_MNT=$(mktemp -d)
 trap _on_exit EXIT HUP INT TERM
 
 
-#    Commit that generated this build.
+#    Commit from which this build was generated.
 
 VERSION=@TRAVIS_COMMIT@
 
@@ -399,8 +381,8 @@ case $CMD in
 	status)    _status $@    ;;
 	list)      _list $@      ;;
 
-	-h|--help)     _show_help     ;;
-	-v|--version)  _show_version  ;;
+	-h|--help)     cat $PREFIX/HELP  ;;
+	-v|--version)  echo $VERSION     ;;
 
 	*) _e "Unknown command '$1'." ;;
 
