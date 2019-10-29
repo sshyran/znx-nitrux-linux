@@ -379,7 +379,7 @@ VERSION=@TRAVIS_COMMIT@
 
 #    Option handling.
 
-[ $# -gt 0 ] &&
+[ $# -gt 0 ] ||
 	_e "No command given. Try '$0 -h' for more information."
 
 CMD=$1
