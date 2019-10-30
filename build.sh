@@ -3,20 +3,44 @@
 
 #    Install dependencies.
 
-apt-get -qq -y update > /dev/null
-apt-get -qq -y install wget patchelf file libcairo2 > /dev/null
-apt-get -qq -y install mtools xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin > /dev/null
+apt -qq update > /dev/null
+apt -yy install wget patchelf file libcairo2 mtools xorriso axel gdisk zsync btrfs-progs dosfstools grub-common grub2-common grub-efi-amd64 grub-efi-amd64-bin git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison
 
-apt-get -qq -y install git autoconf gettext automake libtool-bin autopoint pkg-config libncurses5-dev bison > /dev/null
+
+# -- Update xorriso, grub, util-linux.
+
+files='
+http://mirrors.kernel.org/ubuntu/pool/universe/libi/libisoburn/xorriso_1.5.0-1build1_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/universe/libi/libisoburn/libisoburn1_1.5.0-1build1_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/universe/libb/libburn/libburn4_1.5.0-1_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/universe/libi/libisofs/libisofs6_1.5.0-1_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/r/readline/libreadline8_8.0-1_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/r/readline/readline-common_8.0-1_all.deb
+http://mirrors.kernel.org/ubuntu/pool/main/n/ncurses/libtinfo6_6.1+20181013-2ubuntu2_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub-efi-amd64-bin_2.02-2ubuntu8.13_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub-common_2.02-2ubuntu8.13_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/g/grub2/grub2-common_2.02-2ubuntu8.13_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libmount1_2.34-0.1ubuntu2_amd64.deb
+http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libsmartcols1_2.34-0.1ubuntu2_amd64.deb
+'
+
+mkdir /deb_files
+
+for x in $files; do
+printf "$x"
+    wget -q -P /deb_files $x
+done
+
+dpkg -iR /deb_files
+dpkg --configure -a
+rm -r /deb_files
+
+
+#    Add tooling for AppImage.
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
 wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/copier
 wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/mkiso
-
-wget -q http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libmount1_2.33.1-0.1ubuntu2_amd64.deb
-wget -q http://mirrors.kernel.org/ubuntu/pool/main/u/util-linux/libsmartcols1_2.33.1-0.1ubuntu2_amd64.deb
-dpkg -i libmount1_2.33.1-0.1ubuntu2_amd64.deb
-dpkg -i libsmartcols1_2.33.1-0.1ubuntu2_amd64.deb
 
 chmod +x appimagetool
 chmod +x copier
@@ -24,9 +48,9 @@ chmod +x mkiso
 chmod +x appdir/znx
 
 
-#    Build util-linux 2.33
+#    Build util-linux 2.34.
 
-git clone https://github.com/karelzak/util-linux.git --depth 1 --branch stable/v2.33
+git clone --depth 1 --single-branch --branch v2.34 https://github.com/karelzak/util-linux.git
 
 (
 	cd util-linux
