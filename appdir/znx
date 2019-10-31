@@ -146,7 +146,7 @@ _deploy () {
 	mkdir -p $TMP_MNT/STORE/$2/DATA
 
 	(
-		trap "rm -rf $TMP_MNT/STORE/${2%/*}" INT
+		trap "rm -rf $TMP_MNT/STORE/$2" INT
 
 		[ -f $3 ] &&
 			cp "$3" $TMP_MNT/STORE/$2/$ACTIVE_IMAGE
