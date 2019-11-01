@@ -125,15 +125,32 @@ _fix_esp () {
 		_e "Wrong number of arguments."
 
 	echo "Restoring the ESP on '$1'."
+
 	_create_esp $(_find_part $1 ZNX_BOOT)
+
 	echo "Successfully restored the ESP on '$1'."
 }
 
 
 #    Deploy an image.
-#    _deploy <device> <image> <origin>.
+#    _deploy [options] <device> <image> <origin>.
 
 _deploy () {
+	for arg in $@; do
+
+		case $arg in
+
+			-k)
+
+				axel_args="$axel_args -k"
+				shift
+
+			;;
+
+		esac
+
+	done
+
 	[ $# -eq 3 ] ||
 		_e "Wrong number of arguments."
 
@@ -155,7 +172,7 @@ _deploy () {
 			mkiso "$3" $TMP_MNT/STORE/$2/$ACTIVE_IMAGE
 
 		[ -e "$3" ] ||
-			axel "$3" -a -o $TMP_MNT/STORE/$2/$ACTIVE_IMAGE
+			axel "$axel_args" "$3" -a -o $TMP_MNT/STORE/$2/$ACTIVE_IMAGE
 
 	) || _e "Failed to deploy '$2'."
 
