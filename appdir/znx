@@ -133,7 +133,7 @@ _fix_esp () {
 
 
 #    Deploy an image.
-#    _deploy [options] <device> <image> <origin>.
+#    _deploy [-k] <device> <image> <origin>.
 
 _deploy () {
 	for arg in $@; do

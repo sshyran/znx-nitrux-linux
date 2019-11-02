@@ -39,12 +39,12 @@ rm -r /deb_files
 #    Add tooling for AppImage.
 
 wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/copier
-wget -q https://gitlab.com/nitrux/tools/build-utilities/raw/master/mkiso
+wget -q https://raw.githubusercontent.com/Nitrux/tools/master/execs
+wget -q https://raw.githubusercontent.com/Nitrux/tools/master/copier
 
 chmod +x appimagetool
 chmod +x copier
-chmod +x mkiso
+chmod +x execs
 chmod +x appdir/znx
 
 
@@ -71,16 +71,11 @@ rm /lib/x86_64-linux-gnu/libmount.so.1*
 
 #    Copy binaries and its dependencies to appdir.
 
-./copier mkiso appdir
-./copier axel appdir
-./copier mcopy appdir
-./copier zsync appdir
-./copier lsblk appdir
-./copier sgdisk appdir
-./copier wipefs appdir
-./copier xorriso appdir
-./copier mkfs.vfat appdir
-./copier mkfs.btrfs appdir
+wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -o /bin/mkiso
+chmod +x /bin/mkiso
+
+
+./copier appdir $(./copier appdir/znx)
 
 
 #    Build GRUB's boot image.
