@@ -378,9 +378,10 @@ VERSION=@TRAVIS_COMMIT@
 
 #    Shortcut for enabling debugging.
 
-[ "$1" = "-x" ] &&
+[ "$1" = "-x" ] && {
 	set -x
-
+	shift
+}
 
 #    Option handling.
 
@@ -427,6 +428,6 @@ case $CMD in
 	status)    _status $@    ;;
 	list)      _list $@      ;;
 
-	*) _e "Unknown command '$1'." ;;
+	*) _e "Unknown command '$CMD'." ;;
 
 esac
