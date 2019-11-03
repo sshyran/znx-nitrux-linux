@@ -376,6 +376,12 @@ trap _on_exit EXIT HUP INT TERM
 VERSION=@TRAVIS_COMMIT@
 
 
+#    Shortcut for enabling debugging.
+
+[ "$1" = "-x" ] &&
+	set -x
+
+
 #    Option handling.
 
 [ $# -gt 0 ] ||
