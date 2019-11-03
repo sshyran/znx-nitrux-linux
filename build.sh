@@ -75,7 +75,7 @@ wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -o /bin/mkis
 chmod +x /bin/mkiso
 
 
-./copier appdir $(./copier appdir/znx)
+./copier appdir $(./execs appdir/znx)
 
 
 #    Build GRUB's boot image.
