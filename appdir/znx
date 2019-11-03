@@ -386,8 +386,8 @@ shift
 
 case $CMD in
 
-	-h|--help)     cat $PREFIX/HELP  ;;
-	-v|--version)  echo $VERSION     ;;
+	-h|--help)     cat $PREFIX/HELP; exit  ;;
+	-v|--version)  echo $VERSION; exit     ;;
 
 esac
 
