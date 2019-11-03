@@ -1,9 +1,9 @@
-#! /bin/sh
+#! /bin/bash
 
 
 #    Exit on error.
 
-set -e
+set -eo pipefail
 
 _e () {
 	echo -e "${0##*/}: \e[31mError:\e[0m $@" >&2;
