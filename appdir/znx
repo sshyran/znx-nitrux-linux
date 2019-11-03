@@ -155,7 +155,7 @@ _deploy () {
 		_e "Wrong number of arguments."
 
 	_mount $1 ZNX_DATA
-	echo "Deploying $IMAGE."
+	echo "Deploying '$2'."
 
 	[ -d $TMP_MNT/STORE/$2 ] &&
 		_e "'$2' is already deployed."
@@ -349,7 +349,7 @@ _list () {
 
 	_mount $1 ZNX_DATA
 
-	cd $TMP_MNT/STORE ||
+	cd $TMP_MNT/STORE 2> /dev/null ||
 		_e "No images are deployed."
 
 	ls -1 -d */*
@@ -386,8 +386,15 @@ shift
 
 case $CMD in
 
-	-h|--help)     cat $PREFIX/HELP; exit  ;;
-	-v|--version)  echo $VERSION; exit     ;;
+	-h|--help)
+		cat $PREFIX/HELP
+		exit
+	;;
+
+	-v|--version)
+		echo "znx version: $VERSION."
+		exit
+	;;
 
 esac
 
