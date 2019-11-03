@@ -4,6 +4,7 @@
 #    Exit on error.
 
 set -eo pipefail
+shopt -s inherit_errexit
 
 _e () {
 	echo -e "${0##*/}: \e[31mError:\e[0m $@" >&2;
@@ -174,7 +175,12 @@ _deploy () {
 		[ -e "$3" ] ||
 			axel $axel_args "$3" -a -o $TMP_MNT/STORE/$2/$ACTIVE_IMAGE
 
-	) || _e "Failed to deploy '$2'."
+	) || {
+
+		# Remove garbage before exiting.
+		_e "Failed to deploy '$2'."
+
+	}
 
 	echo "Successfully deployed '$2'."
 }
