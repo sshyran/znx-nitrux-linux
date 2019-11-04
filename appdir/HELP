@@ -1,56 +1,33 @@
-Usage: znx <option | command>
+Usage: znx <option | command> [command_args]
 
 Options:
 
   -h, --help                             Print this help.
   -v, --version                          Print the commit hash that generated this binary.
 
+Conventions:
+
+  <device>:
+  A block device file name. e.g.: /dev/sda, /dev/sdb.
+
+  <image>:
+  Must match the regular expression: '^\w+/\w+$'. This means that letters, numbers and underscores
+  are allowed on both sides of a slash. No other characters are allowed.
+
+  <origin>:
+  Can be a URL or a path pointing to an ISO image, or a directory path. The latter may be useful
+  for deploying images from within a live session.
+
 Commands:
 
-  init <device>                          Initialize the storage device.
-  restore <device>                       Restore the ESP (EFI System Partition) of the given device.
-  deploy <device> <image> <URL | path>   Deploy an image on a storage device. Do not use whitespaces in filenames.
-  rename <device> <old_name> <new_name>  Rename the specified image.
-  update <device> <image>                Update the specified image.
-  revert <device> <image>                Revert to the previous version of the image.
+  init <device>                          Initialize <device>.
+  restore <device>                       Restore the ESP (EFI System Partition) of <device>.
+  deploy <device> <image> <origin>       Deploy <image> on <device> from <origin>.
+  rename <device> <old_name> <new_name>  Rename image <old_name> to <new_name>.
+  update <device> <image>                Update <image>.
+  revert <device> <image>                Revert an update.
   clean <device> <image>                 Remove the backup that is created during an update.
-  reset <device> <image>                 Delete all user data of the specified image.
-  remove <device> <image>                Remove the specified image.
-  stats <device> <image>                 Show statistics about the provided image.
-  list <device>                          List the deployed images.
-
-Examples:
-
-  Initialize a device:
-  - znx init /dev/sdX
-
-  Restore the ESP of a device:
-  - znx restore /dev/sdX
-
-  Deploy an image:
-  - znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
-  - znx deploy /dev/sdX vendor/release /path/to/image.iso
-
-  Rename an image:
-  - znx rename /dev/sdX vendor/release new/name
-
-  Update an image:
-  - znx update /dev/sdX vendor/release
-
-  Revert an update (downgrade):
-  - znx revert /dev/sdX vendor/release
-
-  Delete the backup of an image:
-  - znx clean /dev/sdX vendor/release
-
-  Reset an image to its original state:
-  - znx reset /dev/sdX vendor/release
-
-  Remove an image:
-  - znx remove /dev/sdX vendor/release
-
-  Show statistics about an image:
-  - znx stats /dev/sdX vendor/release
-
-  List the deployed images on a device:
-  - znx list /dev/sdX
+  reset <device> <image>                 Delete all user data on <image>.
+  remove <device> <image>                Remove <image> and all associated data from <device>.
+  status <device> <image>                Show information about <image>.
+  list <device>                          List the deployed images on <device>.
