@@ -64,6 +64,9 @@ _find_part () {
 #    _mount <device> <partition label> [mount options].
 
 _mount () {
+	[ $(_find_part $1 $2) ] ||
+		_e "Could not find the partition. Device may not be initialized."
+
 	mount $(_find_part $1 $2) $TMP_MNT ${3:+-o $3}
 }
 
