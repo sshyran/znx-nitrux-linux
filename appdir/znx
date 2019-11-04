@@ -1,10 +1,16 @@
 #! /bin/bash
 
 
+#    Shell settings.
+
+shopt -s \
+	inherit_errexit \
+	nullglob
+
+
 #    Exit on error.
 
 set -eo pipefail
-shopt -s inherit_errexit
 
 _e () {
 	echo -e "${0##*/}: \e[31mError:\e[0m $@" >&2;
@@ -42,7 +48,7 @@ _confirm () {
 #    _check_img_name <name>.
 
 _check_img_name () {
-	echo $@ | grep -qE '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$'
+	echo $@ | grep -qE '^\w+/\w+$'
 }
 
 
@@ -201,7 +207,7 @@ _rename () {
 		_e "'$2' is not deployed."
 
 	_check_img_name $3 ||
-		_e "Bad image name (must match '^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+$')."
+		_e "Bad image name (must match '^\w+/\w+$')."
 
 	mv $TMP_MNT/STORE/$2 $TMP_MNT/STORE/$3 ||
 		_e "Unable to rename '$2'."
@@ -358,7 +364,7 @@ _list () {
 	cd $TMP_MNT/STORE 2> /dev/null ||
 		_e "No images are deployed."
 
-	ls -1 -d */*
+	echo */* | tr " " "\n"
 }
 
 
