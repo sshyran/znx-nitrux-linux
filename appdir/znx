@@ -1,14 +1,14 @@
 #! /bin/bash
 
 
-#    Shell settings.
+#   Shell settings.
 
 shopt -s \
 	inherit_errexit \
 	nullglob
 
 
-#    Exit on error.
+#   Exit on error.
 
 set -eo pipefail
 
@@ -18,8 +18,8 @@ _e () {
 }
 
 
-#    Clean mountpoints and temporary directories on exit.
-#    To be called by the trap.
+#   Clean mountpoints and temporary directories on exit.
+#   To be called by the trap.
 
 _on_exit () {
 	cd /
@@ -30,8 +30,8 @@ _on_exit () {
 }
 
 
-#    Confirm an operation.
-#    _confirm <message>.
+#   Confirm an operation.
+#   _confirm <message>.
 
 _confirm () {
 	read a -n 1 -p "\e[31m$@\e[0m [y/N] "
@@ -43,24 +43,24 @@ _confirm () {
 }
 
 
-#    Check an image name.
-#    _check_img_name <name>.
+#   Check an image name.
+#   _check_img_name <name>.
 
 _check_img_name () {
 	echo $@ | grep -qE '^\w+/\w+$'
 }
 
 
-#    Find a partition based on a label.
-#    _find_part <device> <label>.
+#   Find a partition based on a label.
+#   _find_part <device> <label>.
 
 _find_part () {
 	lsblk -no PATH,PARTLABEL $1 | grep $2 | cut -d ' ' -f 1
 }
 
 
-#    Mount a device partition.
-#    _mount <device> <partition label> [mount options].
+#   Mount a device partition.
+#   _mount <device> <partition label> [mount options].
 
 _mount () {
 	[ $(_find_part $1 $2) ] ||
@@ -70,8 +70,8 @@ _mount () {
 }
 
 
-#    Create or restore a broken ESP.
-#    _create_esp <partition>.
+#   Create or restore a broken ESP.
+#   _create_esp <partition>.
 
 _create_esp () {
 	mkfs.vfat -F 32 $1
@@ -91,8 +91,8 @@ _create_esp () {
 }
 
 
-#    Initialize a device.
-#    _init <device>.
+#   Initialize a device.
+#   _init <device>.
 
 _init () {
 	[ $# -eq 1 ] ||
@@ -126,8 +126,8 @@ _init () {
 }
 
 
-#    Attempt to restore a broken ESP.
-#    _fix_esp <device>.
+#   Attempt to restore a broken ESP.
+#   _fix_esp <device>.
 
 _fix_esp () {
 	[ $# -eq 1 ] ||
@@ -141,8 +141,8 @@ _fix_esp () {
 }
 
 
-#    Deploy an image.
-#    _deploy [-k] <device> <image> <origin>.
+#   Deploy an image.
+#   _deploy [-k] <device> <image> <origin>.
 
 _deploy () {
 	for arg in $@; do
@@ -185,7 +185,7 @@ _deploy () {
 
 	) || {
 
-		# Remove garbage before exiting.
+		#   Remove garbage before exiting.
 		_e "Failed to deploy '$2'."
 
 	}
@@ -194,8 +194,8 @@ _deploy () {
 }
 
 
-#    Rename an image.
-#    _rename <device> <image> <image>.
+#   Rename an image.
+#   _rename <device> <old_name> <new_name>.
 
 _rename () {
 	[ $# -eq 3 ] ||
@@ -211,7 +211,7 @@ _rename () {
 	_check_img_name $3 ||
 		_e "Bad image name (must match '^\w+/\w+$')."
 
-	mkdir -p $TMP_MNT/STORE/$3
+	mkdir -p $TMP_MNT/STORE/${3%/*}
 
 	mv $TMP_MNT/STORE/$2 $TMP_MNT/STORE/$3 ||
 		_e "Unable to rename '$2'."
@@ -220,8 +220,8 @@ _rename () {
 }
 
 
-#    Update an image.
-#    _update <device> <image>.
+#   Update an image.
+#   _update <device> <image>.
 
 _update () {
 	[ $# -eq 2 ] ||
@@ -234,7 +234,7 @@ _update () {
 	cd $TMP_MNT/STORE/$2 ||
 		_e "'$2' is not deployed."
 
-	#    This will be removed soon.
+	#   This will be removed soon.
 	UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
 
 	U_TMP_MNT=$(mktemp -d)
@@ -252,8 +252,8 @@ _update () {
 }
 
 
-#    Rollback an update.
-#    _rollback <device> <image>.
+#   Rollback an update.
+#   _rollback <device> <image>.
 
 _rollback () {
 	[ $# -eq 2 ] ||
@@ -273,8 +273,8 @@ _rollback () {
 }
 
 
-#    Clear all user data for the specified image.
-#    _reset <device> <image>.
+#   Clear all user data for the specified image.
+#   _reset <device> <image>.
 
 _reset () {
 	[ $# -eq 2 ] ||
@@ -293,8 +293,8 @@ _reset () {
 }
 
 
-#    Delete the backup image that is created after an update.
-#    _clean <device> <image>.
+#   Delete the backup image that is created after an update.
+#   _clean <device> <image>.
 
 _clean () {
 	[ $# -eq 2 ] ||
@@ -314,8 +314,8 @@ _clean () {
 }
 
 
-#    Remove the specified image.
-#    _remove <device> <image>.
+#   Remove the specified image.
+#   _remove <device> <image>.
 
 _remove () {
 	[ $# -eq 2 ] ||
@@ -331,15 +331,11 @@ _remove () {
 
 	rm -rf $TMP_MNT/STORE/$2
 	echo "Successfully removed '$2'."
-
-	#    Silently remove empty directories. Issue #52.
-
-	rmdir --ignore-fail-on-non-empty $TMP_MNT/STORE/*
 }
 
 
-#    Show the status of the given image.
-#    _status <device> <image>.
+#   Show the status of the given image.
+#   _status <device> <image>.
 
 _status () {
 	[ $# -eq 2 ] ||
@@ -356,8 +352,8 @@ _status () {
 }
 
 
-#    List the deployed images.
-#    _list <device>.
+#   List the deployed images.
+#   _list <device>.
 
 _list () {
 	[ $# -eq 1 ] ||
@@ -372,7 +368,7 @@ _list () {
 }
 
 
-#    Settings.
+#   Settings.
 
 PREFIX=${0%/*}
 
@@ -382,24 +378,24 @@ BACKUP_IMAGE=IMAGE.0.zs-old
 TMP_MNT=$(mktemp -d)
 
 
-#    Always perform a cleanup on exit.
+#   Always perform a cleanup on exit.
 
 trap _on_exit EXIT HUP INT TERM
 
 
-#    Commit from which this build was generated.
+#   Commit from which this build was generated.
 
 VERSION=@TRAVIS_COMMIT@
 
 
-#    Shortcut for enabling debugging.
+#   Shortcut for enabling debugging.
 
 [ "$1" = "-d" -o "$1" = "--debug" ] && {
 	set -x
 	shift
 }
 
-#    Option handling.
+#   Option handling.
 
 [ $# -gt 0 ] ||
 	_e "No command given. Try '${0##*/} -h' for more information."
@@ -447,3 +443,8 @@ case $CMD in
 	*) _e "Unknown command '$CMD'." ;;
 
 esac
+
+
+#   Silently remove empty directories. Issue #52.
+
+rmdir --ignore-fail-on-non-empty $TMP_MNT/STORE/*/*
