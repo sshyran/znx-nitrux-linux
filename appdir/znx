@@ -211,6 +211,8 @@ _rename () {
 	_check_img_name $3 ||
 		_e "Bad image name (must match '^\w+/\w+$')."
 
+	mkdir -p $TMP_MNT/STORE/$3
+
 	mv $TMP_MNT/STORE/$2 $TMP_MNT/STORE/$3 ||
 		_e "Unable to rename '$2'."
 
