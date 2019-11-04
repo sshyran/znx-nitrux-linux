@@ -34,9 +34,8 @@ _on_exit () {
 #    _confirm <message>.
 
 _confirm () {
-	echo -en "\e[31m$@\e[0m [y/N] "
-
-	read a
+	read a -n 1 -p "\e[31m$@\e[0m [y/N] "
+	echo
 
 	[ "$a" = y ] &&
 		return 0 ||
