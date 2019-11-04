@@ -2,8 +2,9 @@ Usage: znx <option | command> [command_args]
 
 Options:
 
-  -h, --help                             Print this help.
-  -v, --version                          Print the commit hash that generated this binary.
+  -h, --help     Print this help.
+  -v, --version  Print the commit hash that generated this binary.
+  -d, --debug    Enable debugging messages.
 
 Conventions:
 

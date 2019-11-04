@@ -393,7 +393,7 @@ VERSION=@TRAVIS_COMMIT@
 
 #    Shortcut for enabling debugging.
 
-[ "$1" = "-x" ] && {
+[ "$1" = "-d" -o "$1" = "--debug" ] && {
 	set -x
 	shift
 }
