@@ -145,20 +145,10 @@ _fix_esp () {
 #   _deploy [-k] <device> <image> <origin>.
 
 _deploy () {
-	for arg in $@; do
-
-		case $arg in
-
-			-k)
-
-				axel_args="$axel_args -k"
-				shift
-
-			;;
-
-		esac
-
-	done
+	[ "$1" = "-k" ] && {
+		axel_args="$axel_args -k"
+		shift
+	}
 
 	[ $# -eq 3 ] ||
 		_e "Wrong number of arguments."
