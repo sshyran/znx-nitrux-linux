@@ -74,7 +74,7 @@ wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -o /bin/mkis
 chmod +x /bin/mkiso
 
 
-./copier appdir $(sh -x ./execs appdir/znx)
+sh -x ./copier appdir $(sh -x ./execs appdir/znx)
 
 echo "
 
