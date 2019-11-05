@@ -73,7 +73,19 @@ rm /lib/x86_64-linux-gnu/libmount.so.1*
 wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -o /bin/mkiso
 chmod +x /bin/mkiso
 
-./copier appdir $(./execs appdir/znx)
+
+./copier appdir $(sh -x ./execs appdir/znx)
+
+echo "
+
+	---------- MKISO ----------
+
+	$(cat $(./execs appdir/znx | grep mkiso))
+
+	---------------------------
+
+"
+
 
 
 #    Build GRUB's boot image.
