@@ -70,22 +70,11 @@ rm /lib/x86_64-linux-gnu/libmount.so.1*
 
 #    Copy binaries and its dependencies to appdir.
 
-wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -o /bin/mkiso
+wget -q https://raw.githubusercontent.com/Nitrux/tools/master/mkiso -O /bin/mkiso
 chmod +x /bin/mkiso
 
-
-sh -x ./copier appdir $(sh -x ./execs appdir/znx)
-
-echo "
-
-	---------- MKISO ----------
-
-	$(cat $(./execs appdir/znx | grep mkiso))
-
-	---------------------------
-
-"
-
+./copier appdir $(./execs appdir/znx)
+./copier appdir $(./execs $(find . -name mkiso))
 
 
 #    Build GRUB's boot image.
