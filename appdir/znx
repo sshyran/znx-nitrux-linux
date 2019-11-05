@@ -86,7 +86,7 @@ _create_esp () {
 		$TMP_MNT/efi/boot
 
 	cp -r \
-		$PREFIX/grub \
+		$PREFIX/grub/* \
 		$TMP_MNT/boot/grub
 }
 
