@@ -224,9 +224,6 @@ _update () {
 	cd $TMP_MNT/STORE/$2 ||
 		_e "'$2' is not deployed."
 
-	#   This will be removed soon.
-	UPDATE_URL=$(dd if=$ACTIVE_IMAGE bs=1 skip=33651 count=512 2> /dev/null)
-
 	U_TMP_MNT=$(mktemp -d)
 	mount -r $TMP_MNT/STORE/$2/$ACTIVE_IMAGE $U_TMP_MNT
 	UPDATE_URL=${UPDATE_URL:-$(awk '/^UPDATE_URL/ { print $2 }' $U_TMP_MNT/.INFO)}
