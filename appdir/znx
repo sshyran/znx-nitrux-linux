@@ -437,4 +437,4 @@ esac
 
 #   Silently remove empty directories. Issue #52.
 
-rmdir --ignore-fail-on-non-empty $TMP_MNT/STORE/*/*
+rmdir --ignore-fail-on-non-empty $TMP_MNT/STORE/*/* 2> /dev/null || :
