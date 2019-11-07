@@ -387,6 +387,7 @@ VERSION=@TRAVIS_COMMIT@
 	shift
 }
 
+
 #   Option handling.
 
 [ $# -gt 0 ] ||
