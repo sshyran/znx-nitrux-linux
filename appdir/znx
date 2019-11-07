@@ -273,6 +273,9 @@ _reset () {
 
 	echo "Clearing user data on '$2'."
 
+	[ -d $TMP_MNT/STORE/$2 ] ||
+		_e "'$2' is not deployed."
+
 	rm -rf $TMP_MNT/STORE/$2/DATA/* ||
 		_e "Failed to clear data on '$2'."
 
