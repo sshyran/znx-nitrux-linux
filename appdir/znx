@@ -251,7 +251,7 @@ _rollback () {
 	echo "Reverting last update of '$2'."
 
 	cd $TMP_MNT/STORE/$2 ||
-		_e "$IMAGE is not deployed."
+		_e "'$2' is not deployed."
 
 	mv -f $BACKUP_IMAGE $ACTIVE_IMAGE ||
 		_e "Unable to perform a rollback on '$2'."
@@ -300,7 +300,7 @@ _clean () {
 		_e "'$2' is not deployed."
 
 	rm -f $BACKUP_IMAGE
-	echo "Sucessfully cleaned $IMAGE."
+	echo "Sucessfully cleaned '$2'."
 }
 
 
