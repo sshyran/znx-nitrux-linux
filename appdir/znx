@@ -333,8 +333,10 @@ _status () {
 
 	_mount $1 ZNX_DATA
 
-	cd $TMP_MNT/STORE/$2 ||
+	[ -d $TMP_MNT/STORE/$2 ] ||
 		_e "'$2' is not deployed."
+
+	cd $TMP_MNT/STORE/$2
 
 	echo "Image size: $(ls -sh $ACTIVE_IMAGE | cut -d ' ' -f 1)."
 	echo "Last update: $(date -u -r $ACTIVE_IMAGE)."
