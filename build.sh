@@ -97,7 +97,7 @@ ARCH=$(uname -m)
 TRAVIS_COMMIT=${1:0:7}
 TRAVIS_BRANCH=$2
 
-RELEASE_NAME="znx-$TRAVIS_BRANCH-$TRAVIS_COMMIT-$ARCH.AppImage"
+RELEASE_NAME="znx-$TRAVIS_BRANCH-$ARCH.AppImage"
 UPDATE_URL="zsync|https://github.com/Nitrux/znx/releases/download/continuous-$TRAVIS_BRANCH/$RELEASE_NAME"
 
 
