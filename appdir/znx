@@ -64,9 +64,22 @@ _find_part () {
 
 _mount () {
 	[ $(_find_part $1 $2) ] ||
-		_e "Could not find the partition. Device may not be initialized."
+		_e "Could not find the partition. The device may not have been initialized."
 
 	mount $(_find_part $1 $2) $TMP_MNT ${3:+-o $3}
+}
+
+
+#   Get the update URL of an image.
+#   _get_url <tmp_mount_path> <type: HASH_URL, UPDATE_URL>.
+
+_get_url () {
+	IMG_MNT=$(mktemp -d)
+	mount -r $1 $U_TMP_MNT
+
+	grep "^$2" $IMG_MNT/.INFO | awk '{ print $2 }'
+
+	umount -f $IMG_MNT
 }
 
 
@@ -221,21 +234,51 @@ _update () {
 
 	echo "Updating '$2'."
 
-	cd $TMP_MNT/STORE/$2 ||
+	[ -d $TMP_MNT/STORE/$2 ] ||
 		_e "'$2' is not deployed."
 
-	U_TMP_MNT=$(mktemp -d)
-	mount -r $TMP_MNT/STORE/$2/$ACTIVE_IMAGE $U_TMP_MNT
-	UPDATE_URL=${UPDATE_URL:-$(awk '/^UPDATE_URL/ { print $2 }' $U_TMP_MNT/.INFO)}
-	umount -f $U_TMP_MNT
+	UPDATE_URL=$(_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE UPDATE_URL)
 
-	[ $UPDATE_URL ] ||
-		_e "'$2' did not provided any information for the update; aborting."
+	[ "$UPDATE_URL" ] ||
+		_e "'$2' did not provide any information for the update; aborting."
 
-	zsync ${UPDATE_URL#*zsync\|} -o $ACTIVE_IMAGE ||
+	cd $TMP_MNT/STORE/$2
+
+	zsync "$UPDATE_URL" -o $ACTIVE_IMAGE ||
 		_e "Failed to update '$2'."
 
 	echo "Successfully updated '$2'."
+}
+
+
+#   Check if an update is available.
+#   _c_update <device> <image>.
+
+_c_update () {
+	[ $# -eq 2 ] ||
+		_e "Wrong number of arguments."
+
+	_mount $1 ZNX_DATA
+
+	echo "Checking for updates on '$2'."
+
+	[ -d $TMP_MNT/STORE/$2 ] ||
+		_e "'$2' is not deployed."
+
+	UPDATE_URL=$(_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE HASH_URL)
+
+	[ "$UPDATE_URL" ] ||
+		_e "'$2' did not provide any information for the check; aborting."
+
+	cd $TMP_MNT/STORE/$2
+
+	LOCAL_HASH=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
+	REMOTE_HASH=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
+
+	[ $LOCAL_HASH = $REMOTE_HASH ] ||
+		_e "No updates available for '$2'."
+
+	echo "An update for '$2' is available."
 }
 
 
@@ -421,17 +464,18 @@ esac
 
 case $CMD in
 
-	init)      _init $@      ;;
-	fix-esp)   _fix_esp $@   ;;
-	deploy)    _deploy $@    ;;
-	rename)    _rename $@    ;;
-	update)    _update $@    ;;
-	rollback)  _rollback $@  ;;
-	reset)     _reset $@     ;;
-	clean)     _clean $@     ;;
-	remove)    _remove $@    ;;
-	status)    _status $@    ;;
-	list)      _list $@      ;;
+	init)          _init $@      ;;
+	fix-esp)       _fix_esp $@   ;;
+	deploy)        _deploy $@    ;;
+	rename)        _rename $@    ;;
+	update)        _update $@    ;;
+	check-update)  _c_update $@  ;;
+	rollback)      _rollback $@  ;;
+	reset)         _reset $@     ;;
+	clean)         _clean $@     ;;
+	remove)        _remove $@    ;;
+	status)        _status $@    ;;
+	list)          _list $@      ;;
 
 	*) _e "Unknown command '$CMD'." ;;
 
