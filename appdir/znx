@@ -34,8 +34,12 @@ _on_exit () {
 #   _confirm <message>.
 
 _confirm () {
-	echo -ne "\e[31m$@\e[0m [y/N] "
-	read a
+	[ "$no_confirm" = y ] && {
+		a=y
+	} || {
+		echo -ne "\e[31m$@\e[0m [y/N] "
+		read a
+	}
 
 	[ "$a" = y ] &&
 		return 0 ||
@@ -436,10 +440,7 @@ VERSION=@TRAVIS_COMMIT@
 [ $# -gt 0 ] ||
 	_e "No command given. Try '${0##*/} -h' for more information."
 
-CMD=$1
-shift
-
-case $CMD in
+case $1 in
 
 	-h|--help)
 		cat $PREFIX/HELP
@@ -449,6 +450,11 @@ case $CMD in
 	-v|--version)
 		echo "znx version: $VERSION."
 		exit
+	;;
+
+	-y|--no-confirm)
+		no_confirm=y
+		shift
 	;;
 
 esac
@@ -462,7 +468,10 @@ esac
 
 #   Command handling.
 
-case $CMD in
+cmd=$1
+shift
+
+case $cmd in
 
 	init)          _init $@      ;;
 	fix-esp)       _fix_esp $@   ;;
