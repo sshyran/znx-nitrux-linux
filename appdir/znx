@@ -75,11 +75,11 @@ _mount () {
 
 
 #	Get the update URL of an image.
-#	_get_url <tmp_mount_path> <type: HASH_URL, UPDATE_URL>.
+#	_get_url <tmp_mount_path> <HASH_URL, UPDATE_URL>.
 
 _get_url () {
 	IMG_MNT=$(mktemp -d)
-	mount -r $1 $U_TMP_MNT
+	mount -r $1 $IMG_MNT
 
 	grep "^$2" $IMG_MNT/.INFO | awk '{ print $2 }'
 
