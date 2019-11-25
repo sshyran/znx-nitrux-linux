@@ -118,7 +118,8 @@ _init () {
 	grep -q $1 /proc/mounts &&
 		_e "'$1' is mounted! Unmount it before continuing."
 
-	_confirm "ALL data on '$1' will be destroyed. Do you want to proceed?"
+	_confirm "ALL data on '$1' will be destroyed. Do you want to proceed?" ||
+		echo "Aborted."
 
 	echo "Wiping '$1'. Please wait."
 
@@ -314,7 +315,8 @@ _reset () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "This operation will remove ALL user data found in '$2'."
+	_confirm "This operation will remove ALL user data found in '$2'." ||
+		echo "Aborted."
 
 	_mount $1 ZNX_DATA
 
@@ -337,7 +339,8 @@ _clean () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "The backup image for '$1' will be removed. Do you want to proceed?"
+	_confirm "The backup image for '$1' will be removed. Do you want to proceed?" ||
+		echo "Aborted."
 
 	_mount $1 ZNX_DATA
 
@@ -358,7 +361,8 @@ _remove () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "'$2' will be removed from '$1'. Do you want to proceed?"
+	_confirm "'$2' will be removed from '$1'. Do you want to proceed?" ||
+		echo "Aborted."
 
 	_mount $1 ZNX_DATA
 	echo "Removing '$2'."
