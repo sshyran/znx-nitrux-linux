@@ -433,33 +433,37 @@ VERSION=@TRAVIS_COMMIT@
 [ $# -gt 0 ] ||
 	_e "No command given. Try '${0##*/} -h' for more information."
 
-case $1 in
+while :; do
+	case $1 in
 
-	-h|--help)
-		cat $PREFIX/HELP
-		exit
-	;;
+		-h|--help)
+			cat $PREFIX/HELP
+			exit
+		;;
 
-	-v|--version)
-		echo "znx version: $VERSION."
-		exit
-	;;
+		-v|--version)
+			echo "znx version: $VERSION."
+			exit
+		;;
 
-	#	Shortcut for enabling debugging.
+		#	Shortcut for enabling debugging.
 
-	-d|--debug)
-		set -x
-		shift
-	;;
+		-d|--debug)
+			set -x
+			shift
+		;;
 
-	#	Autoconfirmation.
+		#	Autoconfirmation.
 
-	-y|--no-confirm)
-		no_confirm=y
-		shift
-	;;
+		-y|--no-confirm)
+			no_confirm=y
+			shift
+		;;
 
-esac
+		*) break;;
+
+	esac
+done
 
 
 #	Check if it is being ran as root.
