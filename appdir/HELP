@@ -1,4 +1,4 @@
-Usage: znx <option | command> [command_args]
+Usage: znx [options] <command> [command_args]
 
 Options:
 
