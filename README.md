@@ -20,41 +20,65 @@ to the AppImage, and run znx as root.
 Examples.
 
 - Initialize a device:
-`znx init /dev/sdX`
+```
+znx init /dev/sdX
+```
 
 - Restore the ESP of a device:
-`znx fix-esp /dev/sdX`
+```
+znx fix-esp /dev/sdX
+```
 
 - Deploy an image:
-`znx deploy /dev/sdX vendor/release http://foo.bar/image.iso`
-`znx deploy /dev/sdX vendor/release /path/to/image.iso`
+```
+znx deploy /dev/sdX vendor/release http://foo.bar/image.iso
+znx deploy /dev/sdX vendor/release /path/to/image.iso
+```
 
 - Rename an image:
-`znx rename /dev/sdX vendor/release new/name`
+```
+znx rename /dev/sdX vendor/release new/name
+```
 
 - Update an image:
-`znx update /dev/sdX vendor/release`
+```
+znx update /dev/sdX vendor/release
+```
 
 - Check the availability of updates for an image:
-`znx check-update /dev/sdX vendor/release`
+```
+znx check-update /dev/sdX vendor/release
+```
 
 - Revert an update (downgrade):
-`znx rollback /dev/sdX vendor/release`
+```
+znx rollback /dev/sdX vendor/release
+```
 
 - Reset an image to a pristine state:
-`znx reset /dev/sdX vendor/release`
+```
+znx reset /dev/sdX vendor/release
+```
 
 - Delete an image's backup:
-`znx clean /dev/sdX vendor/release`
+```
+znx clean /dev/sdX vendor/release
+```
 
 - Remove an image:
-`znx remove /dev/sdX vendor/release`
+```
+znx remove /dev/sdX vendor/release
+```
 
 - Show the status of an image:
-`znx status /dev/sdX vendor/release`
+```
+znx status /dev/sdX vendor/release
+```
 
 - List the deployed images on a device:
-`znx list /dev/sdX`
+```
+znx list /dev/sdX
+```
 
 ---
 
