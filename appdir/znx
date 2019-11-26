@@ -277,10 +277,10 @@ _c_update () {
 
 	cd $TMP_MNT/STORE/$2
 
-	LOCAL_HASH=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
-	REMOTE_HASH=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
+	local_hash=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
+	remote_hash=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
 
-	[ $LOCAL_HASH = $REMOTE_HASH ] ||
+	[ $local_hash = $remote_hash ] ||
 		_e "No updates available for '$2'."
 
 	echo "An update for '$2' is available."
