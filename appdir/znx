@@ -242,10 +242,10 @@ _update () {
 	[ -d $TMP_MNT/STORE/$2 ] ||
 		_e "'$2' is not deployed."
 
-	UPDATE_URL=$(_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE UPDATE_URL)
-
-	[ "$UPDATE_URL" ] ||
-		_e "'$2' did not provide any information for the update; aborting."
+	UPDATE_URL=$(
+		_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE UPDATE_URL ||
+			_e "'$2' did not provide any information for the update. Aborting."
+	)
 
 	cd $TMP_MNT/STORE/$2
 
@@ -270,10 +270,10 @@ _c_update () {
 	[ -d $TMP_MNT/STORE/$2 ] ||
 		_e "'$2' is not deployed."
 
-	UPDATE_URL=$(_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE HASH_URL)
-
-	[ "$UPDATE_URL" ] ||
-		_e "'$2' did not provide any information for the check. Aborting."
+	UPDATE_URL=$(
+		_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE HASH_URL ||
+			_e "'$2' did not provide any information for the check. Aborting."
+	)
 
 	cd $TMP_MNT/STORE/$2
 
