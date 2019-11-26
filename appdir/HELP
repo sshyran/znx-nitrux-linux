@@ -24,7 +24,8 @@ Commands:
 
   init <device>                          Initialize <device>.
   fix-esp <device>                       Restore the ESP (EFI System Partition) of <device>.
-  deploy <device> <image> <origin>       Deploy <image> on <device> from <origin>.
+  deploy [-k] <device> <image> <origin>  Deploy <image> on <device> from <origin>.
+                                         The '-k' flag serves to bypass SSL certificate checking.
   rename <device> <old_name> <new_name>  Rename image <old_name> to <new_name>.
   update <device> <image>                Update <image>.
   check-update <device> <image>          Check if an update for <image> is available.
