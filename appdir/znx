@@ -362,7 +362,7 @@ _remove () {
 		_e "Wrong number of arguments."
 
 	_confirm "'$2' will be removed from '$1'. Do you want to proceed?" ||
-		echo "Aborted."
+		_e "Aborted."
 
 	_mount $1 ZNX_DATA
 	echo "Removing '$2'."
