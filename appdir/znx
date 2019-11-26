@@ -273,14 +273,14 @@ _c_update () {
 	UPDATE_URL=$(_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE HASH_URL)
 
 	[ "$UPDATE_URL" ] ||
-		_e "'$2' did not provide any information for the check; aborting."
+		_e "'$2' did not provide any information for the check. Aborting."
 
 	cd $TMP_MNT/STORE/$2
 
-	local_hash=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
-	remote_hash=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
+	hash1=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
+	hash2=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
 
-	[ $local_hash = $remote_hash ] ||
+	[ $hash1 = $hash2 ] ||
 		_e "No updates available for '$2'."
 
 	echo "An update for '$2' is available."
