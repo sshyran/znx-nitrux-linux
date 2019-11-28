@@ -1,10 +1,11 @@
-Usage: znx <option | command> [command_args]
+Usage: znx [options] <command> [command_args]
 
 Options:
 
-  -h, --help     Print this help.
-  -v, --version  Print the commit hash that generated this binary.
-  -d, --debug    Enable debugging messages.
+  -h, --help        Print this help.
+  -v, --version     Print the commit hash that generated this binary.
+  -d, --debug       Enable debugging messages.
+  -y, --no-confirm  Autoconfirm dangerous operations.
 
 Conventions:
 
@@ -22,13 +23,15 @@ Conventions:
 Commands:
 
   init <device>                          Initialize <device>.
-  restore <device>                       Restore the ESP (EFI System Partition) of <device>.
-  deploy <device> <image> <origin>       Deploy <image> on <device> from <origin>.
+  fix-esp <device>                       Restore the ESP (EFI System Partition) of <device>.
+  deploy [-k] <device> <image> <origin>  Deploy <image> on <device> from <origin>.
+                                         The '-k' flag serves to bypass SSL certificate checking.
   rename <device> <old_name> <new_name>  Rename image <old_name> to <new_name>.
   update <device> <image>                Update <image>.
-  revert <device> <image>                Revert an update.
-  clean <device> <image>                 Remove the backup that is created during an update.
+  check-update <device> <image>          Check if an update for <image> is available.
+  rollback <device> <image>              Revert an update.
   reset <device> <image>                 Delete all user data on <image>.
+  clean <device> <image>                 Remove the backup that is created during an update.
   remove <device> <image>                Remove <image> and all associated data from <device>.
   status <device> <image>                Show information about <image>.
   list <device>                          List the deployed images on <device>.

@@ -1,14 +1,14 @@
 #! /bin/bash
 
 
-#   Shell settings.
+#	Shell settings.
 
 shopt -s \
 	inherit_errexit \
 	nullglob
 
 
-#   Exit on error.
+#	Exit on error.
 
 set -eo pipefail
 
@@ -18,8 +18,8 @@ _e () {
 }
 
 
-#   Clean mountpoints and temporary directories on exit.
-#   To be called by the trap.
+#	Clean mountpoints and temporary directories on exit.
+#	To be called by the trap.
 
 _on_exit () {
 	cd /
@@ -30,12 +30,16 @@ _on_exit () {
 }
 
 
-#   Confirm an operation.
-#   _confirm <message>.
+#	Confirm an operation.
+#	_confirm <message>.
 
 _confirm () {
-	echo -ne "\e[31m$@\e[0m [y/N] "
-	read a
+	[ "$no_confirm" = y ] && {
+		a=y
+	} || {
+		echo -ne "\e[31m$@\e[0m [y/N] "
+		read a
+	}
 
 	[ "$a" = y ] &&
 		return 0 ||
@@ -43,35 +47,48 @@ _confirm () {
 }
 
 
-#   Check an image name.
-#   _check_img_name <name>.
+#	Check an image name.
+#	_check_img_name <name>.
 
 _check_img_name () {
 	echo $@ | grep -qE '^\w+/\w+$'
 }
 
 
-#   Find a partition based on a label.
-#   _find_part <device> <label>.
+#	Find a partition based on a label.
+#	_find_part <device> <label>.
 
 _find_part () {
 	lsblk -no PATH,PARTLABEL $1 | grep $2 | cut -d ' ' -f 1
 }
 
 
-#   Mount a device partition.
-#   _mount <device> <partition label> [mount options].
+#	Mount a device partition.
+#	_mount <device> <partition label> [mount options].
 
 _mount () {
 	[ $(_find_part $1 $2) ] ||
-		_e "Could not find the partition. Device may not be initialized."
+		_e "Could not find the partition. The device may not have been initialized."
 
 	mount $(_find_part $1 $2) $TMP_MNT ${3:+-o $3}
 }
 
 
-#   Create or restore a broken ESP.
-#   _create_esp <partition>.
+#	Get the update URL of an image.
+#	_get_url <tmp_mount_path> <HASH_URL, UPDATE_URL>.
+
+_get_url () {
+	IMG_MNT=$(mktemp -d)
+	mount -r $1 $IMG_MNT
+
+	grep "^$2" $IMG_MNT/.INFO | awk '{ print $2 }'
+
+	umount -f $IMG_MNT
+}
+
+
+#	Create or restore a broken ESP.
+#	_create_esp <partition>.
 
 _create_esp () {
 	mkfs.vfat -F 32 $1
@@ -91,8 +108,8 @@ _create_esp () {
 }
 
 
-#   Initialize a device.
-#   _init <device>.
+#	Initialize a device.
+#	_init <device>.
 
 _init () {
 	[ $# -eq 1 ] ||
@@ -101,7 +118,8 @@ _init () {
 	grep -q $1 /proc/mounts &&
 		_e "'$1' is mounted! Unmount it before continuing."
 
-	_confirm "ALL data on '$1' will be destroyed. Do you want to proceed?"
+	_confirm "ALL data on '$1' will be destroyed. Do you want to proceed?" ||
+		echo "Aborted."
 
 	echo "Wiping '$1'. Please wait."
 
@@ -126,8 +144,8 @@ _init () {
 }
 
 
-#   Attempt to restore a broken ESP.
-#   _fix_esp <device>.
+#	Attempt to restore a broken ESP.
+#	_fix_esp <device>.
 
 _fix_esp () {
 	[ $# -eq 1 ] ||
@@ -141,8 +159,8 @@ _fix_esp () {
 }
 
 
-#   Deploy an image.
-#   _deploy [-k] <device> <image> <origin>.
+#	Deploy an image.
+#	_deploy [-k] <device> <image> <origin>.
 
 _deploy () {
 	[ "$1" = "-k" ] && {
@@ -175,7 +193,7 @@ _deploy () {
 
 	) || {
 
-		#   Remove garbage before exiting.
+		#	Remove garbage before exiting.
 		_e "Failed to deploy '$2'."
 
 	}
@@ -184,8 +202,8 @@ _deploy () {
 }
 
 
-#   Rename an image.
-#   _rename <device> <old_name> <new_name>.
+#	Rename an image.
+#	_rename <device> <old_name> <new_name>.
 
 _rename () {
 	[ $# -eq 3 ] ||
@@ -210,8 +228,8 @@ _rename () {
 }
 
 
-#   Update an image.
-#   _update <device> <image>.
+#	Update an image.
+#	_update <device> <image>.
 
 _update () {
 	[ $# -eq 2 ] ||
@@ -221,26 +239,56 @@ _update () {
 
 	echo "Updating '$2'."
 
-	cd $TMP_MNT/STORE/$2 ||
+	[ -d $TMP_MNT/STORE/$2 ] ||
 		_e "'$2' is not deployed."
 
-	U_TMP_MNT=$(mktemp -d)
-	mount -r $TMP_MNT/STORE/$2/$ACTIVE_IMAGE $U_TMP_MNT
-	UPDATE_URL=${UPDATE_URL:-$(awk '/^UPDATE_URL/ { print $2 }' $U_TMP_MNT/.INFO)}
-	umount -f $U_TMP_MNT
+	UPDATE_URL=$(
+		_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE UPDATE_URL ||
+			_e "'$2' did not provide any information for the update. Aborting."
+	)
 
-	[ $UPDATE_URL ] ||
-		_e "'$2' did not provided any information for the update; aborting."
+	cd $TMP_MNT/STORE/$2
 
-	zsync ${UPDATE_URL#*zsync\|} -o $ACTIVE_IMAGE ||
+	zsync "$UPDATE_URL" -o $ACTIVE_IMAGE ||
 		_e "Failed to update '$2'."
 
 	echo "Successfully updated '$2'."
 }
 
 
-#   Rollback an update.
-#   _rollback <device> <image>.
+#	Check if an update is available.
+#	_c_update <device> <image>.
+
+_c_update () {
+	[ $# -eq 2 ] ||
+		_e "Wrong number of arguments."
+
+	_mount $1 ZNX_DATA
+
+	echo "Checking for updates on '$2'."
+
+	[ -d $TMP_MNT/STORE/$2 ] ||
+		_e "'$2' is not deployed."
+
+	UPDATE_URL=$(
+		_get_url $TMP_MNT/STORE/$2/$ACTIVE_IMAGE HASH_URL ||
+			_e "'$2' did not provide any information for the check. Aborting."
+	)
+
+	cd $TMP_MNT/STORE/$2
+
+	hash1=$(wget -qO - $UPDATE_URL | cut -d " " -f 1)
+	hash2=$(md5sum $ACTIVE_IMAGE | cut -d " " -f 1)
+
+	[ $hash1 = $hash2 ] &&
+		_e "No updates available for '$2'."
+
+	echo "An update for '$2' is available."
+}
+
+
+#	Rollback an update.
+#	_rollback <device> <image>.
 
 _rollback () {
 	[ $# -eq 2 ] ||
@@ -260,14 +308,15 @@ _rollback () {
 }
 
 
-#   Clear all user data for the specified image.
-#   _reset <device> <image>.
+#	Clear all user data for the specified image.
+#	_reset <device> <image>.
 
 _reset () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "This operation will remove ALL user data found in '$2'."
+	_confirm "This operation will remove ALL user data found in '$2'." ||
+		echo "Aborted."
 
 	_mount $1 ZNX_DATA
 
@@ -283,14 +332,15 @@ _reset () {
 }
 
 
-#   Delete the backup image that is created after an update.
-#   _clean <device> <image>.
+#	Delete the backup image that is created after an update.
+#	_clean <device> <image>.
 
 _clean () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "The backup image for '$1' will be removed. Do you want to proceed?"
+	_confirm "The backup image for '$1' will be removed. Do you want to proceed?" ||
+		echo "Aborted."
 
 	_mount $1 ZNX_DATA
 
@@ -304,14 +354,15 @@ _clean () {
 }
 
 
-#   Remove the specified image.
-#   _remove <device> <image>.
+#	Remove the specified image.
+#	_remove <device> <image>.
 
 _remove () {
 	[ $# -eq 2 ] ||
 		_e "Wrong number of arguments."
 
-	_confirm "'$2' will be removed from '$1'. Do you want to proceed?"
+	_confirm "'$2' will be removed from '$1'. Do you want to proceed?" ||
+		_e "Aborted."
 
 	_mount $1 ZNX_DATA
 	echo "Removing '$2'."
@@ -324,8 +375,8 @@ _remove () {
 }
 
 
-#   Show the status of the given image.
-#   _status <device> <image>.
+#	Show the status of the given image.
+#	_status <device> <image>.
 
 _status () {
 	[ $# -eq 2 ] ||
@@ -344,8 +395,8 @@ _status () {
 }
 
 
-#   List the deployed images.
-#   _list <device>.
+#	List the deployed images.
+#	_list <device>.
 
 _list () {
 	[ $# -eq 1 ] ||
@@ -360,7 +411,7 @@ _list () {
 }
 
 
-#   Settings.
+#	Settings.
 
 PREFIX=${0%/*}
 
@@ -370,74 +421,86 @@ BACKUP_IMAGE=IMAGE.0.zs-old
 TMP_MNT=$(mktemp -d)
 
 
-#   Always perform a cleanup on exit.
+#	Always perform a cleanup on exit.
 
 trap _on_exit EXIT HUP INT TERM
 
 
-#   Commit from which this build was generated.
+#	Commit from which this build was generated.
 
 VERSION=@TRAVIS_COMMIT@
 
 
-#   Shortcut for enabling debugging.
 
-[ "$1" = "-d" -o "$1" = "--debug" ] && {
-	set -x
-	shift
-}
-
-
-#   Option handling.
+#	Option handling.
 
 [ $# -gt 0 ] ||
 	_e "No command given. Try '${0##*/} -h' for more information."
 
-CMD=$1
-shift
+while :; do
+	case $1 in
 
-case $CMD in
+		-h|--help)
+			cat $PREFIX/HELP
+			exit
+		;;
 
-	-h|--help)
-		cat $PREFIX/HELP
-		exit
-	;;
+		-v|--version)
+			echo "znx version: $VERSION."
+			exit
+		;;
 
-	-v|--version)
-		echo "znx version: $VERSION."
-		exit
-	;;
+		#	Shortcut for enabling debugging.
 
-esac
+		-d|--debug)
+			set -x
+			shift
+		;;
+
+		#	Autoconfirmation.
+
+		-y|--no-confirm)
+			no_confirm=y
+			shift
+		;;
+
+		*) break;;
+
+	esac
+done
 
 
-#   Check if it is being ran as root.
+#	Check if it is being ran as root.
 
 [ $(id -u) -eq 0 ] ||
 	_e "This program must be ran as root."
 
 
-#   Command handling.
+#	Command handling.
 
-case $CMD in
+cmd=$1
+shift
 
-	init)      _init $@      ;;
-	fix-esp)   _fix_esp $@   ;;
-	deploy)    _deploy $@    ;;
-	rename)    _rename $@    ;;
-	update)    _update $@    ;;
-	rollback)  _rollback $@  ;;
-	reset)     _reset $@     ;;
-	clean)     _clean $@     ;;
-	remove)    _remove $@    ;;
-	status)    _status $@    ;;
-	list)      _list $@      ;;
+case $cmd in
 
-	*) _e "Unknown command '$CMD'." ;;
+	init)          _init $@      ;;
+	fix-esp)       _fix_esp $@   ;;
+	deploy)        _deploy $@    ;;
+	rename)        _rename $@    ;;
+	update)        _update $@    ;;
+	check-update)  _c_update $@  ;;
+	rollback)      _rollback $@  ;;
+	reset)         _reset $@     ;;
+	clean)         _clean $@     ;;
+	remove)        _remove $@    ;;
+	status)        _status $@    ;;
+	list)          _list $@      ;;
+
+	*) _e "Unknown command '$cmd'." ;;
 
 esac
 
 
-#   Silently remove empty directories. Issue #52.
+#	Silently remove empty directories. Issue #52.
 
 rmdir $TMP_MNT/STORE/*/* 2> /dev/null || :
