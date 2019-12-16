@@ -171,6 +171,9 @@ _deploy () {
 	[ $# -eq 3 ] ||
 		_e "Wrong number of arguments."
 
+	_check_img_name $2 ||
+		_e "Bad image name: '$2'."
+
 	_mount $1 ZNX_DATA
 	echo "Deploying '$2'."
 
@@ -194,6 +197,7 @@ _deploy () {
 	) || {
 
 		#	Remove garbage before exiting.
+		rm -rf $TMP_MNT/STORE/$2
 		_e "Failed to deploy '$2'."
 
 	}
@@ -501,6 +505,6 @@ case $cmd in
 esac
 
 
-#	Silently remove empty directories. Issue #52.
+#	Silently remove empty directories. See issue #52 (https://github.com/Nitrux/znx/issues/52).
 
-rmdir $TMP_MNT/STORE/*/* 2> /dev/null || :
+rmdir $TMP_MNT/STORE/* 2> /dev/null || :
