@@ -51,7 +51,7 @@ _confirm () {
 #	_check_img_name <name>.
 
 _check_img_name () {
-	echo $@ | grep -qE '^\w+/\w+$'
+	echo $@ | grep -qE "^\w+/\w+$"
 }
 
 
