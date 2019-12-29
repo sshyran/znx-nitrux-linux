@@ -77,11 +77,33 @@ chmod +x /bin/mkiso
 ./copier appdir $(./execs $(find . -name mkiso))
 
 
-#    Build GRUB's boot image.
+#    Build GRUB's boot images.
 
 grub-mkimage \
 	-C xz \
 	-O x86_64-efi \
+	-p /boot/grub \
+	-o appdir/bootx64.efi \
+	boot linux search normal configfile \
+	part_gpt btrfs ext2 fat iso9660 loopback \
+	test keystatus gfxmenu regexp probe \
+	efi_gop efi_uga all_video gfxterm font \
+	echo read ls cat png jpeg halt reboot
+
+grub-mkimage \
+	-C xz \
+	-O i386-efi \
+	-p /boot/grub \
+	-o appdir/bootx64.efi \
+	boot linux search normal configfile \
+	part_gpt btrfs ext2 fat iso9660 loopback \
+	test keystatus gfxmenu regexp probe \
+	efi_gop efi_uga all_video gfxterm font \
+	echo read ls cat png jpeg halt reboot
+
+grub-mkimage \
+	-C xz \
+	-O arm64-efi \
 	-p /boot/grub \
 	-o appdir/bootx64.efi \
 	boot linux search normal configfile \
